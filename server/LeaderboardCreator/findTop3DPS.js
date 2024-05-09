@@ -1,4 +1,4 @@
-const {getListOfPlayersMains, getListOfPlayersAlts} = require("../db/db.js")
+const {getListOfPlayersMains, getListOfPlayersAlts, getListOfSupports} = require("../db/db.js")
 const fs = require("fs");
 const { parse } = require("csv-parse");
 const { log } = require("console");
@@ -17,6 +17,13 @@ async function getCharacterData() {
         alts.forEach(e => {
             altNames.push(e.charactername)
         });
+
+        const supports = await getListOfSupports("e7bb870b-e4cb-47e4-8fbc-167e0603bc29")
+        const supportNames = []
+        supports.forEach(e => {
+            supportNames.push(e.charactername)
+        });
+
         findHighestDPS(altNames)
     } catch (error) {
         console.error('Error retrieving players', error);

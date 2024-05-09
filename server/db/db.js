@@ -116,6 +116,31 @@ function getListOfPlayersAlts(leaderboardID) {
     });
 }
 
+function getListOfSupports(leaderboardID) {
+    return new Promise((resolve, reject) => {
+        client.query(`
+            SELECT 
+                leaderboard.leaderboardid,
+                character.charactername,
+                character.main
+            FROM leaderboard
+            JOIN character ON character.characterid = ANY (leaderboard.characterid)
+            WHERE leaderboard.leaderboardid = '${leaderboardID}'
+            AND character.characterclass = 'Bard'
+			OR character.characterclass = 'Paladin'
+			OR character.characterclass = 'Artist';`,
+            (err, result) => {
+                if (err) {
+                    console.error('Error executing query', err);
+                    reject(err); // Reject the promise with the error
+                } else {
+                    console.log('OK', "OK")
+                    resolve(result.rows); // Resolve the promise with the query result
+                }
+            });
+    });
+}
+
 function addToLeaderboard(){
     client.query(`INSERT INTO Leaderboard (characterid) VALUES('{"4d23defc-fe1f-4205-8150-884788f16afc",
     "6e6fad5a-5ef8-45f6-bd67-f608b547a5aa",
@@ -131,13 +156,8 @@ function addToLeaderboard(){
 });  
 }
 
-//createRosterTable()
-//createCharacterTable()
-//addRoster()
-//addCharacter()
-//createLeaderboardTable()
-//addToLeaderboard()
 
 
 exports.getListOfPlayersMains = getListOfPlayersMains;
 exports.getListOfPlayersAlts = getListOfPlayersAlts;
+exports.getListOfSupports = getListOfSupports;
