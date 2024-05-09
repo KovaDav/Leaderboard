@@ -15,8 +15,8 @@ const [data, setData] = useState(null)
                   },
 				body: JSON.stringify(
                 {
-                        raid: "Ivory_G3_Hard",
-                        mains: true
+                        raid: "Ivory_G3_Normal",
+                        mains: false
                 }),
 			})
 			.then((response) => response.json()

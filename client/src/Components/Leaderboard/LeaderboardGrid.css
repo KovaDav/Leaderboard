@@ -1,0 +1,61 @@
+#LeaderboardGrid{
+    display: grid;
+    justify-items: center;
+    width: 40vw;
+    grid-template-columns: 2fr 1fr 2fr;
+    grid-template-rows: 1fr 1fr 1fr 1fr 1fr;
+    grid-template-areas: 
+    "title title title"
+    "headername headerdps headersupport"
+    "name1 dps1 support1"
+    "name2 dps2 support2"
+    "name3 dps3 support3";
+}
+
+#Title{
+    grid-area: title;
+}
+
+#HeaderName{
+    grid-area: headername;
+}
+
+#HeaderDPS{
+    grid-area: headerdps;
+}
+
+#HeaderSupport{
+    grid-area: headersupport;
+}
+
+.Name1{
+    grid-area: name1;
+}
+.Name2{
+    grid-area: name2;
+}
+.Name3{
+    grid-area: name3;
+}
+
+
+.DPS1{
+    grid-area: dps1;
+}
+.DPS2{
+    grid-area: dps2;
+}
+.DPS3{
+    grid-area: dps3;
+}
+
+
+.Support1{
+    grid-area: support1;
+}
+.Support2{
+    grid-area: support2;
+}
+.Support2{
+    grid-area: support2;
+}

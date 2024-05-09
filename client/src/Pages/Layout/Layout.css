@@ -1,0 +1,41 @@
+.Background{
+    background-image: repeating-linear-gradient(to right, #0f0c29, #302b63, #24243e);
+    min-height: 100vh;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.Header{
+    color: hsl(245, 39%, 97%);
+    font-weight: 400;
+    font-size: 4rem;
+    margin: 1rem;
+    justify-self: flex-start;
+    width: 20rem;
+}
+
+.LayoutPageButton{
+    color: hsl(250, 37%, 3%) !important;
+    background-color: hsl(245, 39%, 97%) !important;
+    margin: 3rem !important;
+  }
+  
+ #LayoutPageButtonContainer{
+    display: flex;
+    justify-content: flex-end;
+    gap: 10rem;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+  }
+
+  #HeaderAndLayoutPageButtonContainer{
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    height: 60%;
+  }
