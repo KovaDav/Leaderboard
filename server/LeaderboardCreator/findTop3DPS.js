@@ -4,7 +4,7 @@ const { parse } = require("csv-parse");
 const { log } = require("console");
 
 
-async function getCharacterData() {
+async function getCharacterData(raid, main) {
     try {
         const mains = await getListOfPlayersMains("e7bb870b-e4cb-47e4-8fbc-167e0603bc29")
         const mainNames = []
@@ -24,21 +24,23 @@ async function getCharacterData() {
             supportNames.push(e.charactername)
         });
 
-        findHighestDPS(altNames)
+                 
+        const result = await findHighestDPS(raid, main ? mainNames : altNames)
+        return result       
     } catch (error) {
         console.error('Error retrieving players', error);
     }
 }
 
-getCharacterData()
 
-function findHighestDPS(players){
+async function findHighestDPS(raid, players){
+    return new Promise((resolve, reject) => {
 
     const highestDPSMap = new Map();
 
     players.forEach(player => highestDPSMap.set(player, 0));
 
-fs.createReadStream("./raided-loa-scraper/data/Akkan_G2_Hard.csv")
+fs.createReadStream(`./raided-loa-scraper/data/${raid}.csv`)
   .pipe(parse({ headers: true }))
   .on("data", (row) => {
     const playerName = row[1];
@@ -53,15 +55,25 @@ fs.createReadStream("./raided-loa-scraper/data/Akkan_G2_Hard.csv")
             .sort((a, b) => b[1] - a[1])
             .slice(0, 3);
 
-        console.log("Top 3 players with highest DPS in Akkan HM G1:");
+        console.log(`Top 3 players with highest DPS in ${raid}:`);
+        const result = []
         sortedPlayers.forEach(([player, dps], index) => {
             console.log(`${index + 1}. Player: ${player}, DPS: ${dps}`);
+            result.push(
+                {
+                        player: player,
+                        dps: dps
+                })
         });
-})
+    
+        resolve(result)
+    })
+
   .on("error", function (error) {
     console.log(error.message);
   });
+});
 }
-function asd(mains){
-    
-}
+
+
+exports.getCharacterData = getCharacterData;

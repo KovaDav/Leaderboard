@@ -86,7 +86,6 @@ function getListOfPlayersMains(leaderboardID) {
                     console.error('Error executing query', err);
                     reject(err); // Reject the promise with the error
                 } else {
-                    console.log('OK', "OK")
                     resolve(result.rows); // Resolve the promise with the query result
                 }
             });
