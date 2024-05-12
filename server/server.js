@@ -7,9 +7,9 @@ app.use(express.json());
 app.use(cors());
   
 
-app.post('/top3', async (req, res) => {
+app.post('/dps', async (req, res) => {
     try {
-        const data = await getCharacterData(req.body.raid, req.body.mains);
+        const data = await getCharacterData(req.params, req.body.mains);
         console.log(data)
         res.json(data);
     } catch (error) {
