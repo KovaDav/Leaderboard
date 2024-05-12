@@ -94,15 +94,15 @@ const LeaderboardPage = () => {
             and name in ('${JSON.parse(partyInfo[0].values[0][1])[0]}','${JSON.parse(partyInfo[0].values[0][1])[1]}','${JSON.parse(partyInfo[0].values[0][1])[2]}','${JSON.parse(partyInfo[0].values[0][1])[3]}') and class in ('Bard', 'Paladin', 'Artist');
             `)
             console.log(support[0].values[0][0])
-            sendPlayerData(nameDpsIdDate[0].values[0][0], nameDpsIdDate[0].values[0][1], nameDpsIdDate[0].values[0][3], support[0].values[0][0])   
+            sendPlayerData(nameDpsIdDate[0].values[0][0], nameDpsIdDate[0].values[0][1], nameDpsIdDate[0].values[0][3], support[0].values[0][0], boss)   
         });
         
     }); 
     console.log(dpsPBList);
        };
-       const sendPlayerData = (player, dps, support, date) =>{
+       const sendPlayerData = (player, dps, date, support, boss) =>{
         fetch(
-			`http://localhost:3001/dps?player=${player}&dps=${dps}&support=${support}&date=${date}`
+			`http://localhost:3001/dps?player=${player}&dps=${dps}&support=${support}&date=${date}$boss=${boss}`
 			
 			,
 			{
