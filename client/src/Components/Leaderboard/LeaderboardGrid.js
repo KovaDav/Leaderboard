@@ -1,35 +1,21 @@
 import { Outlet, Link, useFetcher } from "react-router-dom";
 import "./LeaderboardGrid.css"
 import React, {useEffect, useState, useRef} from 'react';
-
+const initSqlJs = require('sql.js');
 
 const LeaderboardGrid = ({title, mains}) => {
   const [data, setData] = useState(null)
 
   useEffect(() =>{
-    console.log(mains);
-    fetch(
-			`http://localhost:3001/top3`
-			,
-			{
-				method: 'POST',
-                headers: {
-                    "Content-Type": "application/json",
-                  },
-				body: JSON.stringify(
-                {
-                        raid: title,
-                        mains: mains
-                }),
-			})
-			.then((response) => response.json()
-			)
-			.then((result) => {	
-        setData(result)
-			})
-			.catch((error) => {
-				console.error('Error:', error);
-			});
+    initSqlJs({
+      locateFile: name => 'D:/suli/encounters.db' + name
+    }).then(SQL => {
+      const db = new SQL.Database()
+      const result = db.exec(`SELECT * FROM entity where name = 'Lyndoniel' and encounter_id IN (
+        SELECT id FROM encounter WHERE json_extract(misc, '$.partyInfo') like '%"Lyndoniel"%' AND current_boss = 'Veskal' AND json_extract(misc, '$.raidClear') = true)
+        order by dps desc;`)
+      console.log(result)
+    })
   },[])
     
   return(
