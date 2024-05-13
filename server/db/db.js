@@ -155,19 +155,49 @@ function addToLeaderboard(){
 });  
 }
 
-function addToRecords(name, dps, support, date){
-    client.query(`INSERT INTO records (characterid) VALUES('{"4d23defc-fe1f-4205-8150-884788f16afc",
-    "6e6fad5a-5ef8-45f6-bd67-f608b547a5aa",
-    "268d99f1-5778-48b9-bae3-85396efdaa8c",
-    "6780cc2d-c29c-47ca-97a6-53388abafc6c",
-    "64e2b50c-25ce-4f0f-9dd7-1256368a227f",
-    "953de9ce-7c8f-4b6b-8569-72c00a8b05ef"}');`, (err, result) => {
+function addToRecord(id, dps, support, boss, difficulty, date){
+    return new Promise((resolve, reject) => {
+    client.query(`INSERT INTO record (characterid, dps, support, boss, difficulty, date)
+     VALUES('${id}', '${dps}', '${support}', '${boss}', '${difficulty}', '${date}');`
+     ,   (err, result) => {
         if (err) {
             console.error('Error executing query', err);
+            reject(err); // Reject the promise with the error
         } else {
-            console.log('Query result:', result.rows);
+            resolve(result.rows); // Resolve the promise with the query result
         }
+    });
 });  
+}
+
+function findCharacterById(id){
+    client.query(`SELECT charactername 
+    FROM character 
+    WHERE characterid = '${id}'`
+    , (err, result) => {
+        if(err){
+            console.log('Error executing query', err);
+        } else{
+            console.log('Query result:', result);
+        }
+});
+}
+
+function findCharacterIdByName(name){
+
+return new Promise((resolve, reject) => {
+    client.query(`SELECT characterid 
+    FROM character 
+    WHERE charactername = '${name}'`
+    ,   (err, result) => {
+            if (err) {
+                console.error('Error executing query', err);
+                reject(err); // Reject the promise with the error
+            } else {
+                resolve(result.rows); // Resolve the promise with the query result
+            }
+        });
+});
 }
 
 
@@ -175,3 +205,5 @@ function addToRecords(name, dps, support, date){
 exports.getListOfPlayersMains = getListOfPlayersMains;
 exports.getListOfPlayersAlts = getListOfPlayersAlts;
 exports.getListOfSupports = getListOfSupports;
+exports.findCharacterIdByName = findCharacterIdByName;
+exports.addToRecord = addToRecord;
