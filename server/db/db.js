@@ -140,7 +140,7 @@ function getListOfSupports(leaderboardID) {
     });
 }
 
-function addToLeaderboard(){
+function addLeaderboard(){
     client.query(`INSERT INTO Leaderboard (characterid) VALUES('{"4d23defc-fe1f-4205-8150-884788f16afc",
     "6e6fad5a-5ef8-45f6-bd67-f608b547a5aa",
     "268d99f1-5778-48b9-bae3-85396efdaa8c",
@@ -178,13 +178,12 @@ function findCharacterById(id){
         if(err){
             console.log('Error executing query', err);
         } else{
-            console.log('Query result:', result);
+            console.log('Query result:', result.rows);
         }
 });
 }
 
 function findCharacterIdByName(name){
-
 return new Promise((resolve, reject) => {
     client.query(`SELECT characterid 
     FROM character 
@@ -192,14 +191,31 @@ return new Promise((resolve, reject) => {
     ,   (err, result) => {
             if (err) {
                 console.error('Error executing query', err);
-                reject(err); // Reject the promise with the error
+                reject(err);
             } else {
-                resolve(result.rows); // Resolve the promise with the query result
+                resolve(result.rows);
             }
         });
 });
 }
 
+function recordById(id, boss, difficulty){
+    return new Promise((resolve, reject) => {
+        client.query(`SELECT * 
+        FROM record 
+        WHERE characterid = '${id}'
+        AND boss = '${boss}'
+        AND difficulty = '${difficulty}'`
+        ,   (err, result) => {
+                if (err) {
+                    console.error('Error executing query', err);
+                    reject(err);
+                } else {
+                    resolve(result.rows);
+                }
+            });
+    });
+    }
 
 
 exports.getListOfPlayersMains = getListOfPlayersMains;
@@ -207,3 +223,4 @@ exports.getListOfPlayersAlts = getListOfPlayersAlts;
 exports.getListOfSupports = getListOfSupports;
 exports.findCharacterIdByName = findCharacterIdByName;
 exports.addToRecord = addToRecord;
+exports.recordById = recordById;

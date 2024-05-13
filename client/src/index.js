@@ -5,7 +5,7 @@ import reportWebVitals from './reportWebVitals';
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Layout from "./Pages/Layout/Layout.js";
 import LeaderboardPage from './Pages/LeaderboardPage.js';
-
+import CreateLeaderboardPage from './Pages/CreateLeaderboardPage.js';
 
 const router = createBrowserRouter([
   {
@@ -13,8 +13,12 @@ const router = createBrowserRouter([
   element: <Layout />,
   children:[
     {
-      path: "/",
+      path: "/leaderboard",
       element: <LeaderboardPage />
+    },
+    {
+      path: "/create",
+      element: <CreateLeaderboardPage />
     }
   ]
 }
