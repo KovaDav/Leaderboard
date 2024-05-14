@@ -6,7 +6,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Layout from "./Pages/Layout/Layout.js";
 import LeaderboardPage from './Pages/LeaderboardPage.js';
 import CreateLeaderboardPage from './Pages/CreateLeaderboardPage.js';
-
+import ProfilePage from './Pages/ProfilePage.js';
 const router = createBrowserRouter([
   {
   path: "/",
@@ -19,6 +19,10 @@ const router = createBrowserRouter([
     {
       path: "/create",
       element: <CreateLeaderboardPage />
+    },
+    {
+      path: "/profile",
+      element : <ProfilePage />
     }
   ]
 }

@@ -58,11 +58,11 @@ return new Promise((resolve, reject) => {
 });
 }
 
-function addCharacter(rosterId, characterName, characterClass, main){
+function addCharacter(rosterId, characterName, characterClass, main, region){
 return new Promise((resolve, reject) => {
     client.query(
-    `INSERT INTO Character (rosterid, charactername, characterclass, main)
-    VALUES('${rosterId}','${characterName}', '${characterClass}', '${main}')
+    `INSERT INTO Character (rosterids, charactername, characterclass, main, region)
+    VALUES ('{"${rosterId}"}', '${characterName}', '${characterClass}', '${main}', ${region})
     RETURNING characterid;`
     ,   (err, result) => {
             if (err) {
@@ -75,6 +75,24 @@ return new Promise((resolve, reject) => {
         });
 });
 }
+
+function addRosterToCharacter(rosterId,characterId){
+    return new Promise((resolve, reject) => {
+        client.query(
+        `UPDATE character
+        SET rosterids = array_append(rosterids, '${rosterId}')
+        WHERE characterid = '${characterId}';`
+        ,   (err, result) => {
+                if (err) {
+                    console.error('Error executing query', err);
+                    reject(err); // Reject the promise with the error
+                } else {
+                    console.log('OK', "OK")
+                    resolve(result.rows); // Resolve the promise with the query result
+                }
+            });
+    });
+    }
 
 function createLeaderboardTable(){
     client.query("CREATE TABLE Leaderboard (LeaderboardID UUID PRIMARY KEY DEFAULT gen_random_uuid(), characterID UUID[]);", (err, result) => {
@@ -187,6 +205,24 @@ function addToRecord(id, dps, support, boss, difficulty, date){
 });  
 }
 
+function characterAlreadyInALeaderboardById(id){
+    return new Promise((resolve, reject) => {
+    client.query(`SELECT 
+    CASE 
+        WHEN EXISTS (SELECT 1 FROM Leaderboard WHERE characterid @> ARRAY['${id}']::UUID[]) THEN true 
+        ELSE false 
+    END AS exists_in_array;`
+     ,   (err, result) => {
+        if (err) {
+            console.error('Error executing query', err);
+            reject(err); // Reject the promise with the error
+        } else {
+            resolve(result.rows); // Resolve the promise with the query result
+        }
+    });
+});  
+}
+
 function findCharacterById(id){
     client.query(`SELECT charactername 
     FROM character 
@@ -200,6 +236,25 @@ function findCharacterById(id){
 });
 }
 
+function characterExistsByNameAndRegion(name, region){
+    return new Promise((resolve, reject) => {
+        console.log(name, region);
+    client.query(`SELECT 
+    (SELECT characterid
+    FROM character 
+    WHERE charactername = '${name}' 
+    AND region = '${region}'
+    LIMIT 1) AS result;`
+     ,   (err, result) => {
+        if (err) {
+            console.error('Error executing query', err);
+            reject(err); // Reject the promise with the error
+        } else {
+            resolve(result.rows); // Resolve the promise with the query result
+        }
+    });
+});  
+}
 function findCharacterIdByName(name){
 return new Promise((resolve, reject) => {
     client.query(`SELECT characterid 
@@ -244,3 +299,6 @@ exports.recordById = recordById;
 exports.addRoster = addRoster;
 exports.addCharacter = addCharacter;
 exports.addLeaderboard = addLeaderboard;
+exports.characterAlreadyInALeaderboardById = characterAlreadyInALeaderboardById;
+exports.characterExistsByNameAndRegion = characterExistsByNameAndRegion;
+exports.addRosterToCharacter = addRosterToCharacter;

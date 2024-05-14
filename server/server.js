@@ -2,8 +2,59 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const {getCharacterData} = require("./LeaderboardCreator/findTop3DPS.js")
-const {findCharacterIdByName, addToRecord, recordById, addCharacter, addRoster, addLeaderboard} = require("./db/db.js")
-
+const {findCharacterIdByName, addToRecord, recordById, addCharacter, addRoster, addLeaderboard, characterAlreadyInALeaderboardById, characterExistsByNameAndRegion, addRosterToCharacter} = require("./db/db.js")
+const bossList = [
+    ['Killineza the Dark Worshipper', 'Hard'],
+    ['Valinak, Herald of the End', 'Hard'],
+    ['Thaemine the Lightqueller', 'Hard'],
+    ['Thaemine, Conqueror of Stars', 'Hard'],
+    ['Veskal', 'Normal'],
+    ['Killineza the Dark Worshipper', 'Normal'],
+    ['Valinak, Herald of the End', 'Normal'],
+    ['Thaemine the Lightqueller', 'Normal'],
+    ['Kaltaya, the Blooming Chaos', 'Hard'],
+    ['Rakathus, the Lurking Arrogance', 'Hard'],
+    ['Firehorn, Trampler of Earth', 'Hard'],
+    ['Lazaram, the Trailblazer', 'Hard'],
+    ['Kaltaya, the Blooming Chaos', 'Normal'],
+    ['Rakathus, the Lurking Arrogance', 'Normal'],
+    ['Firehorn, Trampler of Earth', 'Normal'],
+    ['Lazaram, the Trailblazer', 'Normal'],
+    ['Gargadeth', 'Normal'],
+    ['Evolved Maurug', 'Hard'],
+    ['Lord of Degradation Akkan', 'Hard'],
+    ['Lord of Kartheon Akkan', 'Hard'],
+    ['Evolved Maurug', 'Normal'],
+    ['Lord of Degradation Akkan', 'Normal'],
+    ['Plague Legion Commander Akkan', 'Normal'],
+    ['Tienis', 'Hard'],
+    ['Prunya', 'Hard'],
+    ['Lauriel', 'Hard'],
+    ['Sonavel', 'Normal'],
+    ['Tienis', 'Normal'],
+    ['Prunya', 'Normal'],
+    ['Lauriel', 'Normal'],
+    ['Hanumatan', 'Normal'],
+    ['Gehenna Helkasirs', 'Hard'],
+    ['Ashtarot', 'Hard'],
+    ['Primordial Nightmare', 'Hard'],
+    ['Phantom Legion Commander Brelshaza', 'Hard'],
+    ['Gehenna Helkasirs', 'Normal'],
+    ['Ashtarot', 'Normal'],
+    ['Primordial Nightmare', 'Normal'],
+    ['Phantom Legion Commander Brelshaza', 'Normal'],
+    ['Saydon', 'Normal'],
+    ['Kakul', 'Normal'],
+    ['Encore-Desiring Kakul-Saydon', 'Normal'],
+    ['Covetous Devourer Vykas', 'Hard'],
+    ['Covetous Legion Commander Vykas', 'Hard'],
+    ['Covetous Devourer Vykas', 'Normal'],
+    ['Covetous Legion Commander Vykas', 'Normal'],
+    ['Dark Mountain Predator', 'Hard'],
+    ['Ravaged Tyrant of Beasts', 'Hard'],
+    ['Dark Mountain Predator', 'Normal'],
+    ['Ravaged Tyrant of Beasts', 'Normal'],
+]
 app.use(express.json());
 app.use(cors());
   
@@ -35,11 +86,27 @@ app.post('/create', async (req, res) => {
             const rosterId = rosterResult[0].rosterid;
             
             for (const character of roster.characters) {
-                const characterResult = await addCharacter(rosterId, character.name, character.class, character.main);
-                characterIdList.push(characterResult[0].characterid);
+                let result = await characterExistsByNameAndRegion(character.name, roster.region);
+                let characterId = result[0].result
+                console.log(result);
+                console.log(characterId);
+                if(characterId === null){
+                    const characterResult = await addCharacter(rosterId, character.name, character.class, character.main, roster.region);
+                    characterIdList.push(characterResult[0].characterid);  
+                }else{
+                    await addRosterToCharacter(rosterId, characterId)
+                    characterIdList.push(characterId);  
+                }
             }
         }
-        
+        for (const id of characterIdList) {
+            let recordExists = await characterAlreadyInALeaderboardById(id)
+            if(!recordExists[0].exists_in_array){
+                for (const boss of bossList) {
+                    await addToRecord(id, '', boss[0], boss[1], '0')
+                }
+            }
+        }
         const leaderboardId = await addLeaderboard(characterIdList.map(id => id))
         console.log(leaderboardId);
         res.json(leaderboardId);
