@@ -1,3 +1,7 @@
 .text{
     color:aliceblue;
 }
+.RosterContainer{
+    display: flex;
+    flex-direction: row;
+}
