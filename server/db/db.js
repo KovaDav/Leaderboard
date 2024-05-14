@@ -40,24 +40,40 @@ function createCharacterTable(){
     });  
 }
 
-function addRoster(){
-    client.query("INSERT INTO Roster (rostername) VALUES('Inga');", (err, result) => {
-        if (err) {
-            console.error('Error executing query', err);
-        } else {
-            console.log('Query result:', result.rows);
-        }
-});  
+function addRoster(rosterName, region){
+return new Promise((resolve, reject) => {
+    client.query(
+    `INSERT INTO Roster (rostername, region) 
+    VALUES('${rosterName}', '${region}')
+    RETURNING rosterid;`
+    ,   (err, result) => {
+            if (err) {
+                console.error('Error executing query', err);
+                reject(err); // Reject the promise with the error
+            } else {
+                console.log('OK', "OK")
+                resolve(result.rows); // Resolve the promise with the query result
+            }
+        });
+});
 }
 
-function addCharacter(){
-    client.query("INSERT INTO Character (rosterid, charactername, characterclass, main) VALUES('e47c6a8b-4aad-4818-9eba-611e149be37d','Ingabet', 'Gunslinger', 'true');", (err, result) => {
-        if (err) {
-            console.error('Error executing query', err);
-        } else {
-            console.log('Query result:', result.rows);
-        }
-});  
+function addCharacter(rosterId, characterName, characterClass, main){
+return new Promise((resolve, reject) => {
+    client.query(
+    `INSERT INTO Character (rosterid, charactername, characterclass, main)
+    VALUES('${rosterId}','${characterName}', '${characterClass}', '${main}')
+    RETURNING characterid;`
+    ,   (err, result) => {
+            if (err) {
+                console.error('Error executing query', err);
+                reject(err); // Reject the promise with the error
+            } else {
+                console.log('OK', "OK")
+                resolve(result.rows); // Resolve the promise with the query result
+            }
+        });
+});
 }
 
 function createLeaderboardTable(){
@@ -140,19 +156,20 @@ function getListOfSupports(leaderboardID) {
     });
 }
 
-function addLeaderboard(){
-    client.query(`INSERT INTO Leaderboard (characterid) VALUES('{"4d23defc-fe1f-4205-8150-884788f16afc",
-    "6e6fad5a-5ef8-45f6-bd67-f608b547a5aa",
-    "268d99f1-5778-48b9-bae3-85396efdaa8c",
-    "6780cc2d-c29c-47ca-97a6-53388abafc6c",
-    "64e2b50c-25ce-4f0f-9dd7-1256368a227f",
-    "953de9ce-7c8f-4b6b-8569-72c00a8b05ef"}');`, (err, result) => {
+function addLeaderboard(listOfCharacterId){ 
+return new Promise((resolve, reject) => {
+    client.query(`INSERT INTO Leaderboard (characterid) 
+    VALUES('{${listOfCharacterId.join(',')}}')
+    RETURNING leaderboardid;`
+     ,   (err, result) => {
         if (err) {
             console.error('Error executing query', err);
+            reject(err); // Reject the promise with the error
         } else {
-            console.log('Query result:', result.rows);
+            resolve(result.rows); // Resolve the promise with the query result
         }
-});  
+    });
+});
 }
 
 function addToRecord(id, dps, support, boss, difficulty, date){
@@ -224,3 +241,6 @@ exports.getListOfSupports = getListOfSupports;
 exports.findCharacterIdByName = findCharacterIdByName;
 exports.addToRecord = addToRecord;
 exports.recordById = recordById;
+exports.addRoster = addRoster;
+exports.addCharacter = addCharacter;
+exports.addLeaderboard = addLeaderboard;

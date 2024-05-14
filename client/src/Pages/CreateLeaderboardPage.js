@@ -9,13 +9,35 @@ const CreateLeaderboardPage = () => {
    const addRoster = () => {
       setRosters([...rosters, { rosterName: '', region: '', characters:[]}]);
     };
+
+   const sendLeaderboardData = () => {
+      console.log(rosters);
+      fetch(
+			`http://localhost:3001/create`
+			,
+			{
+				method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({rosters: rosters}),
+
+			})
+			.then((response) => response.json()
+			)
+			.then((result) => {
+				console.log(result);
+			})
+			.catch((error) => {
+				console.error('Error:', error);
+			});
+   }
+
    return(
     <>
     {rosters.map((character, index) => {
         return <AddRoster key={index} roster={rosters[index]}/>
       })}
       <button onClick={e => addRoster()}>Add New Roster</button>
-      <button onClick={e => console.log(rosters)}>Submit</button>
+      <button onClick={e => sendLeaderboardData()}>Submit</button>
     </>
    )
 };

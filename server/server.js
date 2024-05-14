@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const {getCharacterData} = require("./LeaderboardCreator/findTop3DPS.js")
-const {findCharacterIdByName, addToRecord, recordById} = require("./db/db.js")
+const {findCharacterIdByName, addToRecord, recordById, addCharacter, addRoster, addLeaderboard} = require("./db/db.js")
 
 app.use(express.json());
 app.use(cors());
@@ -25,8 +25,28 @@ app.get('/dps', async (req, res) => {
     res.json({ message: `Received data: ${data}` });
 });
 
-app.get('/members', async (req, res) => {
-
+app.post('/create', async (req, res) => {
+    const rosters = req.body.rosters;
+    let characterIdList = [];
+    
+    try {
+        for (const roster of rosters) {
+            const rosterResult = await addRoster(roster.rosterName, roster.region);
+            const rosterId = rosterResult[0].rosterid;
+            
+            for (const character of roster.characters) {
+                const characterResult = await addCharacter(rosterId, character.name, character.class, character.main);
+                characterIdList.push(characterResult[0].characterid);
+            }
+        }
+        
+        const leaderboardId = await addLeaderboard(characterIdList.map(id => id))
+        console.log(leaderboardId);
+        res.json(leaderboardId);
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
 });
 
 app.listen(3001, () => console.log('Server started on port 3001'));
