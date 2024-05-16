@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const {getCharacterData} = require("./LeaderboardCreator/findTop3DPS.js")
-const {findCharacterIdByName, addToRecord, recordById, addCharacter, addRoster, addLeaderboard, characterAlreadyInALeaderboardById, characterExistsByNameAndRegion, addRosterToCharacter} = require("./db/db.js")
+const {findCharacterIdByName, addToRecord, recordById, addCharacter, addRoster, addLeaderboard, characterAlreadyInALeaderboardById} = require("./db/db.js")
 const bossList = [
     ['Killineza the Dark Worshipper', 'Hard'],
     ['Valinak, Herald of the End', 'Hard'],
@@ -68,7 +68,7 @@ app.get('/dps', async (req, res) => {
     const hasRecord = parseInt(record[0].dps) > 0 ? true : false
 
     if(record[0].dps >= data.dps){
-        //noupdate
+        res.json({ message: `Has higher record than this: ${data}` })
     }else if(record[0].dps < data.dps){
         //update
     }
@@ -82,21 +82,9 @@ app.post('/create', async (req, res) => {
     
     try {
         for (const roster of rosters) {
-            const rosterResult = await addRoster(roster.rosterName, roster.region);
-            const rosterId = rosterResult[0].rosterid;
-            
             for (const character of roster.characters) {
-                let result = await characterExistsByNameAndRegion(character.name, roster.region);
-                let characterId = result[0].result
-                console.log(result);
-                console.log(characterId);
-                if(characterId === null){
-                    const characterResult = await addCharacter(rosterId, character.name, character.class, character.main, roster.region);
-                    characterIdList.push(characterResult[0].characterid);  
-                }else{
-                    await addRosterToCharacter(rosterId, characterId)
-                    characterIdList.push(characterId);  
-                }
+                const characterResult = await addCharacter(roster.name, character.name, character.class, character.main, roster.region);
+                characterIdList.push(characterResult[0].characterid);        
             }
         }
         for (const id of characterIdList) {
