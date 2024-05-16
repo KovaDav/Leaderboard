@@ -4,10 +4,6 @@ import LeaderboardGrid from "../Components/Leaderboard/LeaderboardGrid";
 const initSqlJs = require('sql.js');
 
 const LeaderboardPage = () => {
-
-    const [playerList, setPlayerList] = useState([
-        "Lyndoniel","Ingabet","Ylin", "Nuggetpunch","Derioss","Kongfusion"
-    ])
     const [bossList, setBossList] = useState([
         ['Killineza the Dark Worshipper', 'Hard'],
         ['Valinak, Herald of the End', 'Hard'],
@@ -60,139 +56,50 @@ const LeaderboardPage = () => {
         ['Dark Mountain Predator', 'Normal'],
         ['Ravaged Tyrant of Beasts', 'Normal'],
     ])
-    
+    const [leaderboardData, setLeaderboardData] = useState(null)
 
-    const [error, setError] = useState(null);
-    const [SQL, setSQL] = useState(null);
-
-       // Initialize SQL.js when the component mounts
-       useState(() => {
-           initSqlJs({
-               // Required to load the wasm binary asynchronously.
-               locateFile: file => `https://sql.js.org/dist/${file}`
-           }).then(sql => {
-               setSQL(sql);
-           }).catch(err => {
-               setError(err);
-           });
-       }, []);
-   
-       const changeHandler = (e) => {
-           if (!SQL) {
-               setError("SQL.js is not initialized");
-               return;
-           }
-   
-           const file = e.target.files[0];
-           if (!file) {
-               setError("No file selected");
-               return;
-           }
-   
-           const reader = new FileReader();
-           reader.onload = () => {
-               const buffer = reader.result;
-               const db = new SQL.Database(new Uint8Array(buffer));
-               query(db);
-           };
-           reader.onerror = (err) => {
-               setError(err);
-           };
-           reader.readAsArrayBuffer(file);
-       };
-   
-       const query = (db) => {
-           if (!db) {
-               setError("Database is not initialized");
-               return;
-           }
-
-        
-
-        const dpsPBList = [];
-
-        bossList.forEach(boss => { 
-            console.log(boss[0]);
-        playerList.forEach(player => {
-           let nameDpsIdDate = db.exec(`SELECT e.name, e.dps,e.encounter_id, en.last_combat_packet
-           FROM entity e
-           INNER JOIN encounter en ON e.encounter_id = en.id
-           WHERE e.name = '${player}'
-           AND en.id IN (
-               SELECT id FROM encounter
-               WHERE json_extract(misc, '$.partyInfo') LIKE '%"${player}"%'
-               AND current_boss = '${boss[0]}'
-               AND difficulty = '${boss[1]}'
-               AND json_extract(misc, '$.raidClear') = true
-           )
-           ORDER BY e.dps DESC
-           LIMIT 1;`);
-           console.log(nameDpsIdDate[0]);
-            if(nameDpsIdDate[0] !== undefined){
- 
-            let partyInfo = db.exec(`SELECT 
-            id,
-                CASE
-                    WHEN json_extract(misc, '$.partyInfo.0') LIKE '%"${player}"%' THEN json_extract(misc, '$.partyInfo.0')
-                    WHEN json_extract(misc, '$.partyInfo.1') LIKE '%"${player}"%' THEN json_extract(misc, '$.partyInfo.1')
-                    ELSE NULL
-                END AS containing_key
-            FROM encounter 
-            WHERE id = '${nameDpsIdDate[0].values[0][2]}';
-            `)
-            let hasSupport = true;
-            let support = db.exec(`
-            select name from entity where encounter_id = '${nameDpsIdDate[0].values[0][2]}' 
-            and name in ('${JSON.parse(partyInfo[0].values[0][1])[0]}','${JSON.parse(partyInfo[0].values[0][1])[1]}','${JSON.parse(partyInfo[0].values[0][1])[2]}','${JSON.parse(partyInfo[0].values[0][1])[3]}') and class in ('Bard', 'Paladin', 'Artist');
-            `)
-            
-            support[0] === undefined ? hasSupport = false : hasSupport = true;
-
-            sendPlayerData(JSON.stringify({
-                name: nameDpsIdDate[0].values[0][0], 
-                dps: nameDpsIdDate[0].values[0][1], 
-                date: nameDpsIdDate[0].values[0][3], 
-                support: hasSupport ? support[0].values[0][0] : 'NoSupport',
-                boss: boss[0],
-                difficulty: boss[1]
-            })) 
-            }
-            else{
-            sendPlayerData(JSON.stringify({
-                name: player,
-                dps: 0,
-                date: 0,
-                support: '',
-                boss: boss[0],
-                difficulty: boss[1]
-            })) 
-            } 
-        });
-        
-    }); 
-    console.log(dpsPBList);
-       };
-       const sendPlayerData = (data) =>{
+    useEffect(() =>{
         fetch(
-			`http://localhost:3001/dps?data=${data}`
-			,
-			{
-				method: 'GET',
-			})
-			.then((response) => response.json()
-			)
-			.then((result) => {
-				console.log(result); 	
-			})
-			.catch((error) => {
-				console.error('Error:', error);
-			});
-       }
+                `http://localhost:3001/leaderboard`
+                ,
+                {
+                    method: 'POST',
+                    headers: {
+                        "Content-Type": "application/json",
+                      },
+                    body: JSON.stringify(
+                    {
+                            leaderboardId: "ab1de84c-4c73-4d1d-9bd1-7ba743a36cf2",
+                            leaderboardMains: false
+                    }),
+                })
+                .then((response) => response.json()
+                )
+                .then((result) => {	
+                    setLeaderboardData(JSON.parse(result))
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+      },[])
+
+    const LeaderboardGenerator = () => {
+        return bossList.map(boss => <LeaderboardGrid title={boss} data={getSpecificBossData(boss)}/>)
+     }
+
+    const getSpecificBossData = (boss) => {
+        const result = []
+        leaderboardData.forEach(record => {
+            if(record.boss === boss[0] && record.difficulty === boss[1]){
+                result.push(record)
+            }
+        });
+        return result
+    }
    return(
     <>
-    <input className='description' type="file" name="file" onChange={changeHandler} />
-    {error && <div>Error: {error}</div>}
-    <LeaderboardGrid />
+    
+    {leaderboardData === null ? null : LeaderboardGenerator()}
     </>
    )
 };

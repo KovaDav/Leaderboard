@@ -2,7 +2,8 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const {getCharacterData} = require("./LeaderboardCreator/findTop3DPS.js")
-const {findCharacterIdByName, addToRecord, recordById, addCharacter, addLeaderboard, characterAlreadyInALeaderboardById, updateRecordById} = require("./db/db.js")
+const {findCharacterIdByName, addToRecord, recordById, addCharacter, addLeaderboard, characterAlreadyInALeaderboardById,
+     updateRecordById, getTop3, getCharacterListOfLeaderboardMainOrAlt, getCharacterListOfLeaderboard} = require("./db/db.js")
 const bossList = [
     ['Killineza the Dark Worshipper', 'Hard'],
     ['Valinak, Herald of the End', 'Hard'],
@@ -67,12 +68,16 @@ app.get('/dps', async (req, res) => {
     const record = await recordById(id, data.boss, data.difficulty)
 
     if(record[0].dps >= data.dps){
-        res.json({ message: `Has higher record than this: ${data}` })
+        res.json({ message: `Has higher record than this` })
+        console.log(record[0].dps, data.dps, data.boss, data.name, data.difficulty );
     }else if(record[0].dps < data.dps){
-        await updateRecordById(id, data.dps, data.support, data.boss, data.difficulty, data.date)
+        console.log('updating');
+        console.log(await updateRecordById(id, data.dps, data.support, data.boss, data.difficulty, data.date))
+        res.json({ message: `Updated existing record` });
+    }else{
+        await addToRecord(id, data.dps, data.support, data.boss, data.difficulty, data.date);
+        res.json({ message: `Added new record` });
     }
-    await addToRecord(id, data.dps, data.support, data.boss, data.difficulty, data.date);
-    res.json({ message: `Received data: ${data}` });
 });
 
 app.post('/create', async (req, res) => {
@@ -90,13 +95,45 @@ app.post('/create', async (req, res) => {
             let recordExists = await characterAlreadyInALeaderboardById(id)
             if(!recordExists[0].exists_in_array){
                 for (const boss of bossList) {
-                    await addToRecord(id, '', '',  boss[0], boss[1], '0')
+                    await addToRecord(id, '0', '0',  boss[0], boss[1], '0')
                 }
             }
         }
         const leaderboardId = await addLeaderboard(characterIdList.map(id => id))
         console.log(leaderboardId);
         res.json(leaderboardId);
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+app.post('/leaderboard', async (req, res) => {
+    const leaderboardId = req.body.leaderboardId;
+    const leaderboardMain = req.body.leaderboardMains;
+    try {
+        const characterList = await getCharacterListOfLeaderboardMainOrAlt(leaderboardId,leaderboardMain)
+        const idList = []
+        characterList.forEach(character => {
+            idList.push(character.characterid)
+        });
+        const leaderboardData = await getTop3(idList)
+        res.json(JSON.stringify(leaderboardData));
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+app.post('/characters', async (req, res) => {
+    const leaderboardId = req.body.leaderboardId;
+    try {
+        const characterList = await getCharacterListOfLeaderboard(leaderboardId)
+        const nameList = []
+        characterList.forEach(character => {
+            nameList.push(character.charactername)
+        });
+        res.json(JSON.stringify(nameList));
     } catch (error) {
         console.error('Error:', error);
         res.status(500).json({ error: 'Internal server error' });

@@ -195,9 +195,9 @@ function updateRecordById(id, dps, support, boss, difficulty, date){
     dps = '${dps}',
     support = '${support}',
     date = '${date}'
-    WHERE characterid = '${id}
+    WHERE characterid = '${id}'
     AND boss = '${boss}'
-    AND difficulty = '${difficulty};`
+    AND difficulty = '${difficulty}';`
      ,   (err, result) => {
         if (err) {
             console.error('Error executing query', err);
@@ -275,6 +275,109 @@ function recordById(id, boss, difficulty){
     });
     }
 
+    function getTop3(idList){
+        return new Promise((resolve, reject) => {
+            const idString = idList.map(id => `'${id}'`).join(', ');
+            client.query(`WITH ranked_records AS (
+                SELECT
+                    r.characterid,
+                    r.dps,
+                    r.support,
+                    r.boss,
+                    r.difficulty,
+                    r.date,
+                    ROW_NUMBER() OVER (PARTITION BY r.boss, r.difficulty ORDER BY r.dps DESC) AS rank,
+                    c.charactername  -- Include charactername from the character table
+                FROM
+                    record r
+                JOIN
+                    character c ON r.characterid = c.characterid  -- Join with the character table
+                WHERE
+                    r.characterid IN (${idString})
+            )
+            SELECT
+                characterid,
+                charactername,
+                dps,
+                support,
+                boss,
+                difficulty,
+                date
+            FROM
+                ranked_records
+            WHERE
+                rank <= 3
+            ORDER BY
+                boss,
+                difficulty,
+                rank;`
+            ,   (err, result) => {
+                    if (err) {
+                        console.error('Error executing query', err);
+                        reject(err);
+                    } else {
+                        resolve(result.rows);
+                    }
+                });
+        });
+    }
+
+    function getCharacterListOfLeaderboardMainOrAlt(leaderboardId, main){
+        return new Promise((resolve, reject) => {
+            client.query(`SELECT
+            c.characterid,
+            c.charactername,
+            c.characterclass,
+            c.main,
+            c.region,
+            c.rostername
+        FROM
+            leaderboard l
+        JOIN
+            unnest(l.characterid) AS lcharacterid ON TRUE
+        JOIN
+            character c ON lcharacterid = c.characterid
+        WHERE
+            l.leaderboardid = '${leaderboardId}'
+            AND c.main = '${main}';`
+            ,   (err, result) => {
+                    if (err) {
+                        console.error('Error executing query', err);
+                        reject(err);
+                    } else {
+                        resolve(result.rows);
+                    }
+                });
+        });
+    }
+
+    function getCharacterListOfLeaderboard(leaderboardId){
+        return new Promise((resolve, reject) => {
+            client.query(`SELECT
+            c.characterid,
+            c.charactername,
+            c.characterclass,
+            c.main,
+            c.region,
+            c.rostername
+        FROM
+            leaderboard l
+        JOIN
+            unnest(l.characterid) AS lcharacterid ON TRUE
+        JOIN
+            character c ON lcharacterid = c.characterid
+        WHERE
+            l.leaderboardid = '${leaderboardId}';`
+            ,   (err, result) => {
+                    if (err) {
+                        console.error('Error executing query', err);
+                        reject(err);
+                    } else {
+                        resolve(result.rows);
+                    }
+                });
+        });
+    }
 
 exports.getListOfPlayersMains = getListOfPlayersMains;
 exports.getListOfPlayersAlts = getListOfPlayersAlts;
@@ -286,3 +389,6 @@ exports.addCharacter = addCharacter;
 exports.addLeaderboard = addLeaderboard;
 exports.characterAlreadyInALeaderboardById = characterAlreadyInALeaderboardById;
 exports.updateRecordById = updateRecordById;
+exports.getTop3 = getTop3;
+exports.getCharacterListOfLeaderboardMainOrAlt = getCharacterListOfLeaderboardMainOrAlt;
+exports.getCharacterListOfLeaderboard = getCharacterListOfLeaderboard;
