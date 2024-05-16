@@ -62,7 +62,7 @@ function addCharacter(rosterName, characterName, characterClass, main, region){
 return new Promise((resolve, reject) => {
     client.query(
     `INSERT INTO Character (rostername, charactername, characterclass, main, region)
-    VALUES ('{"${rosterName}"}', '${characterName}', '${characterClass}', '${main}', ${region})
+    VALUES ('${rosterName}', '${characterName}', '${characterClass}', '${main}', '${region}')
     RETURNING characterid;`
     ,   (err, result) => {
             if (err) {
@@ -188,6 +188,27 @@ function addToRecord(id, dps, support, boss, difficulty, date){
 });  
 }
 
+function updateRecordById(id, dps, support, boss, difficulty, date){
+    return new Promise((resolve, reject) => {
+    client.query(`UPDATE record
+    SET  
+    dps = '${dps}',
+    support = '${support}',
+    date = '${date}'
+    WHERE characterid = '${id}
+    AND boss = '${boss}'
+    AND difficulty = '${difficulty};`
+     ,   (err, result) => {
+        if (err) {
+            console.error('Error executing query', err);
+            reject(err); // Reject the promise with the error
+        } else {
+            resolve(result.rows); // Resolve the promise with the query result
+        }
+    });
+});  
+}
+
 function characterAlreadyInALeaderboardById(id){
     return new Promise((resolve, reject) => {
     client.query(`SELECT 
@@ -264,3 +285,4 @@ exports.recordById = recordById;
 exports.addCharacter = addCharacter;
 exports.addLeaderboard = addLeaderboard;
 exports.characterAlreadyInALeaderboardById = characterAlreadyInALeaderboardById;
+exports.updateRecordById = updateRecordById;

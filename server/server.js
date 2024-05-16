@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const {getCharacterData} = require("./LeaderboardCreator/findTop3DPS.js")
-const {findCharacterIdByName, addToRecord, recordById, addCharacter, addRoster, addLeaderboard, characterAlreadyInALeaderboardById} = require("./db/db.js")
+const {findCharacterIdByName, addToRecord, recordById, addCharacter, addLeaderboard, characterAlreadyInALeaderboardById, updateRecordById} = require("./db/db.js")
 const bossList = [
     ['Killineza the Dark Worshipper', 'Hard'],
     ['Valinak, Herald of the End', 'Hard'],
@@ -65,14 +65,13 @@ app.get('/dps', async (req, res) => {
     const result = await findCharacterIdByName(data.name)
     const id = result[0].characterid
     const record = await recordById(id, data.boss, data.difficulty)
-    const hasRecord = parseInt(record[0].dps) > 0 ? true : false
 
     if(record[0].dps >= data.dps){
         res.json({ message: `Has higher record than this: ${data}` })
     }else if(record[0].dps < data.dps){
-        //update
+        await updateRecordById(id, data.dps, data.support, data.boss, data.difficulty, data.date)
     }
-    //console.log(await addToRecord(id, data.dps, data.support, data.boss, data.difficulty, data.date));
+    await addToRecord(id, data.dps, data.support, data.boss, data.difficulty, data.date);
     res.json({ message: `Received data: ${data}` });
 });
 
@@ -91,7 +90,7 @@ app.post('/create', async (req, res) => {
             let recordExists = await characterAlreadyInALeaderboardById(id)
             if(!recordExists[0].exists_in_array){
                 for (const boss of bossList) {
-                    await addToRecord(id, '', boss[0], boss[1], '0')
+                    await addToRecord(id, '', '',  boss[0], boss[1], '0')
                 }
             }
         }
