@@ -4,10 +4,10 @@ import AddCharacter from "../Components/AddCharacter/AddCharacter";
 const initSqlJs = require('sql.js');
 
 const CreateLeaderboardPage = () => {
-   const [characters, setCharacters] = useState([{ name: '', class: '', main: false }]);
+   const [characters, setCharacters] = useState([{ name: '', class: '', main: false, region: '' }]);
  
    const addCharacter = () => {
-      setCharacters([...characters, { name: '', class: '', main: false }]);
+      setCharacters([...characters, { name: '', class: '', main: false, region: '' }]);
     };
   
 

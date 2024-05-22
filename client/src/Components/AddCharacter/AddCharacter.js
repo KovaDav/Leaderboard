@@ -7,6 +7,7 @@ const AddCharacter = ({character}) => {
         <input placeholder='Character Name' onChange={e => {character.name = e.target.value}}></input>
         <input type='checkbox' onClick={e => {character.main = !character.main}}></input>
         <input placeholder='Class' onChange={e => {character.class = e.target.value}}></input>
+        <input placeholder='Region' onChange={e => {character.region = e.target.value}}></input>
       </div>
     );
   }
