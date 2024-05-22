@@ -90,21 +90,22 @@ app.post('/create', async (req, res) => {
             const exists = await characterExists(character.name, character.region)
             if(!exists[0].exists){
                 const characterResult = await addCharacter(character.name, character.class, character.main, character.region);
-                characterIdList.push(characterResult[0].characterid);
+                console.log(characterResult[0].id);
+                characterIdList.push(characterResult[0].id);
             }else{
                 const id = await findCharacterIdByName(character.name, character.region)
                 existingCharacterIdList.push(id[0].id)
             }
         }
+        console.log(characterIdList);
         for (const id of characterIdList) {
             for (const boss of bossList) {
-                await addToRecord(id, '0', '0',  boss[0], boss[1], '0')
+                await addToRecord(id, 0, 'noSupp',  boss[0], boss[1])
             }
         }
         const leaderboardId = await addLeaderboard()
         console.log(leaderboardId[0].id);
         const result = await addCharactersToLeaderboard(leaderboardId[0].id, characterIdList.concat(existingCharacterIdList))
-        console.log(result[0]);
         res.json(leaderboardId);
     } catch (error) {
         console.error('Error:', error);

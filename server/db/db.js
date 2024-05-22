@@ -26,9 +26,9 @@ client
 function addCharacter(characterName, characterClass, main, region){
 return new Promise((resolve, reject) => {
     client.query(
-    `INSERT INTO Character (charactername, class, main, region)
+    `INSERT INTO Character (name, class, main, region)
     VALUES ('${characterName}', '${characterClass}', '${main}', '${region}')
-    RETURNING characterid;`
+    RETURNING id;`
     ,   (err, result) => {
             if (err) {
                 console.error('Error executing query', err);
@@ -150,10 +150,10 @@ function addCharactersToLeaderboard(leaderboardid, characters){
     });
     }
 
-function addToRecord(id, dps, support, boss, difficulty, date){
+function addToRecord(id, dps, support, boss, difficulty){
     return new Promise((resolve, reject) => {
-    client.query(`INSERT INTO record (characterid, dps, support, boss, difficulty, date)
-     VALUES('${id}', '${dps}', '${support}', '${boss}', '${difficulty}', '${date}');`
+    client.query(`INSERT INTO record (characterid, bossname, difficulty, dps, support)
+     VALUES('${id}', '${boss}', '${difficulty}', '${dps}', '${support}');`
      ,   (err, result) => {
         if (err) {
             console.error('Error executing query', err);
@@ -242,7 +242,8 @@ function characterExists(name, region){
             SELECT EXISTS (
                 SELECT 1
                 FROM character
-                WHERE name = '${name}' AND region = '${region}'
+                WHERE name = '${name}'
+                AND region = '${region}'
             );
             `
             ,   (err, result) => {
