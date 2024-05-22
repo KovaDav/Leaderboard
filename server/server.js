@@ -2,8 +2,8 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const {getCharacterData} = require("./LeaderboardCreator/findTop3DPS.js")
-const {findCharacterIdByName, addToRecord, recordById, addCharacter, addLeaderboard, characterAlreadyInALeaderboardById,
-     updateRecordById, getTop3, getCharacterListOfLeaderboardMainOrAlt, getCharacterListOfLeaderboard} = require("./db/db.js")
+const {findCharacterIdByName, addToRecord, recordById, addCharacter, addLeaderboard, updateRecordById, getTop3,
+     getCharacterListOfLeaderboardMainOrAlt, getCharacterListOfLeaderboard, characterExists, addCharactersToLeaderboard} = require("./db/db.js")
 const bossList = [
     ['Killineza the Dark Worshipper', 'Hard'],
     ['Valinak, Herald of the End', 'Hard'],
@@ -83,22 +83,28 @@ app.get('/dps', async (req, res) => {
 app.post('/create', async (req, res) => {
     const characters = req.body.characters;
     let characterIdList = [];
+    let existingCharacterIdList = [];
     
     try { 
         for (const character of characters) {
+            const exists = await characterExists(character.name, character.region)
+            if(!exists[0].exists){
                 const characterResult = await addCharacter(character.name, character.class, character.main, character.region);
-                characterIdList.push(characterResult[0].characterid);        
-        }
-        for (const id of characterIdList) {
-            let recordExists = await characterAlreadyInALeaderboardById(id)
-            if(!recordExists[0].exists_in_array){
-                for (const boss of bossList) {
-                    await addToRecord(id, '0', '0',  boss[0], boss[1], '0')
-                }
+                characterIdList.push(characterResult[0].characterid);
+            }else{
+                const id = await findCharacterIdByName(character.name, character.region)
+                existingCharacterIdList.push(id[0].id)
             }
         }
-        const leaderboardId = await addLeaderboard(characterIdList.map(id => id))
-        console.log(leaderboardId);
+        for (const id of characterIdList) {
+            for (const boss of bossList) {
+                await addToRecord(id, '0', '0',  boss[0], boss[1], '0')
+            }
+        }
+        const leaderboardId = await addLeaderboard()
+        console.log(leaderboardId[0].id);
+        const result = await addCharactersToLeaderboard(leaderboardId[0].id, characterIdList.concat(existingCharacterIdList))
+        console.log(result[0]);
         res.json(leaderboardId);
     } catch (error) {
         console.error('Error:', error);

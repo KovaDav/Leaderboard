@@ -113,11 +113,9 @@ function getListOfSupports(leaderboardID) {
     });
 }
 
-function addLeaderboard(listOfCharacterId){ 
+function addLeaderboard(){ 
 return new Promise((resolve, reject) => {
-    client.query(`INSERT INTO Leaderboard (characterid) 
-    VALUES('{${listOfCharacterId.join(',')}}')
-    RETURNING leaderboardid;`
+    client.query(`INSERT INTO leaderboard DEFAULT VALUES RETURNING id;`
      ,   (err, result) => {
         if (err) {
             console.error('Error executing query', err);
@@ -128,6 +126,29 @@ return new Promise((resolve, reject) => {
     });
 });
 }
+
+function addCharactersToLeaderboard(leaderboardid, characters){ 
+    return new Promise((resolve, reject) => {
+        if (characters.length === 0) {
+            resolve([]);
+            return;
+        }
+
+        const values = characters.map((characterid, index) => `($1, $${index + 2})`).join(", ");
+        const query = `INSERT INTO leaderboard_character (leaderboardid, characterid) VALUES ${values}`;
+
+        const params = [leaderboardid, ...characters];
+
+        client.query(query, params, (err, result) => {
+            if (err) {
+                console.error('Error executing query', err);
+                reject(err); // Reject the promise with the error
+            } else {
+                resolve(result.rows); // Resolve the promise with the query result
+            }
+        });
+    });
+    }
 
 function addToRecord(id, dps, support, boss, difficulty, date){
     return new Promise((resolve, reject) => {
@@ -166,9 +187,9 @@ function updateRecordById(id, dps, support, boss, difficulty, date){
 }
 
 function findCharacterById(id){
-    client.query(`SELECT charactername 
+    client.query(`SELECT name 
     FROM character 
-    WHERE characterid = '${id}'`
+    WHERE id = '${id}'`
     , (err, result) => {
         if(err){
             console.log('Error executing query', err);
@@ -179,11 +200,13 @@ function findCharacterById(id){
 }
 
 
-function findCharacterIdByName(name){
+function findCharacterIdByName(name, region){
 return new Promise((resolve, reject) => {
-    client.query(`SELECT characterid 
+    client.query(`SELECT id 
     FROM character 
-    WHERE charactername = '${name}'`
+    WHERE name = '${name}'
+    AND region = '${region}';
+    `
     ,   (err, result) => {
             if (err) {
                 console.error('Error executing query', err);
@@ -349,3 +372,5 @@ exports.updateRecordById = updateRecordById;
 exports.getTop3 = getTop3;
 exports.getCharacterListOfLeaderboardMainOrAlt = getCharacterListOfLeaderboardMainOrAlt;
 exports.getCharacterListOfLeaderboard = getCharacterListOfLeaderboard;
+exports.characterExists = characterExists;
+exports.addCharactersToLeaderboard = addCharactersToLeaderboard;
