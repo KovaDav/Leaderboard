@@ -81,15 +81,13 @@ app.get('/dps', async (req, res) => {
 });
 
 app.post('/create', async (req, res) => {
-    const rosters = req.body.rosters;
+    const characters = req.body.characters;
     let characterIdList = [];
     
-    try {
-        for (const roster of rosters) {
-            for (const character of roster.characters) {
-                const characterResult = await addCharacter(roster.name, character.name, character.class, character.main, roster.region);
+    try { 
+        for (const character of characters) {
+                const characterResult = await addCharacter(character.name, character.class, character.main, character.region);
                 characterIdList.push(characterResult[0].characterid);        
-            }
         }
         for (const id of characterIdList) {
             let recordExists = await characterAlreadyInALeaderboardById(id)

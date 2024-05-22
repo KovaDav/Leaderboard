@@ -20,49 +20,14 @@ client
 		console.error('Error connecting to PostgreSQL database', err);
 	});
 
-function createRosterTable(){
-    client.query("CREATE TABLE Roster ( RosterID UUID PRIMARY KEY DEFAULT gen_random_uuid(), RosterName varchar(255) )", (err, result) => {
-            if (err) {
-                console.error('Error executing query', err);
-            } else {
-                console.log('Query result:', result.rows);
-            }
-    });  
-}
 
-function createCharacterTable(){
-    client.query("CREATE TABLE Character ( CharacterID UUID PRIMARY KEY DEFAULT gen_random_uuid(), RosterID UUID, CharacterName varchar(255), CharacterClass varchar(255), Main boolean )", (err, result) => {
-            if (err) {
-                console.error('Error executing query', err);
-            } else {
-                console.log('Query result:', result.rows);
-            }
-    });  
-}
 
-function addRoster(rosterName, region){
+
+function addCharacter(characterName, characterClass, main, region){
 return new Promise((resolve, reject) => {
     client.query(
-    `INSERT INTO Roster (rostername, region) 
-    VALUES('${rosterName}', '${region}')
-    RETURNING rosterid;`
-    ,   (err, result) => {
-            if (err) {
-                console.error('Error executing query', err);
-                reject(err); // Reject the promise with the error
-            } else {
-                console.log('OK', "OK")
-                resolve(result.rows); // Resolve the promise with the query result
-            }
-        });
-});
-}
-
-function addCharacter(rosterName, characterName, characterClass, main, region){
-return new Promise((resolve, reject) => {
-    client.query(
-    `INSERT INTO Character (rostername, charactername, characterclass, main, region)
-    VALUES ('${rosterName}', '${characterName}', '${characterClass}', '${main}', '${region}')
+    `INSERT INTO Character (charactername, class, main, region)
+    VALUES ('${characterName}', '${characterClass}', '${main}', '${region}')
     RETURNING characterid;`
     ,   (err, result) => {
             if (err) {
@@ -77,15 +42,6 @@ return new Promise((resolve, reject) => {
 }
 
 
-function createLeaderboardTable(){
-    client.query("CREATE TABLE Leaderboard (LeaderboardID UUID PRIMARY KEY DEFAULT gen_random_uuid(), characterID UUID[]);", (err, result) => {
-        if (err) {
-            console.error('Error executing query', err);
-        } else {
-            console.log('Query result:', result.rows);
-        }
-});  
-}
 
 function getListOfPlayersMains(leaderboardID) {
     return new Promise((resolve, reject) => {
@@ -209,24 +165,6 @@ function updateRecordById(id, dps, support, boss, difficulty, date){
 });  
 }
 
-function characterAlreadyInALeaderboardById(id){
-    return new Promise((resolve, reject) => {
-    client.query(`SELECT 
-    CASE 
-        WHEN EXISTS (SELECT 1 FROM Leaderboard WHERE characterid @> ARRAY['${id}']::UUID[]) THEN true 
-        ELSE false 
-    END AS exists_in_array;`
-     ,   (err, result) => {
-        if (err) {
-            console.error('Error executing query', err);
-            reject(err); // Reject the promise with the error
-        } else {
-            resolve(result.rows); // Resolve the promise with the query result
-        }
-    });
-});  
-}
-
 function findCharacterById(id){
     client.query(`SELECT charactername 
     FROM character 
@@ -274,6 +212,26 @@ function recordById(id, boss, difficulty){
             });
     });
     }
+
+function characterExists(name, region){
+        return new Promise((resolve, reject) => {
+            client.query(`
+            SELECT EXISTS (
+                SELECT 1
+                FROM character
+                WHERE name = '${name}' AND region = '${region}'
+            );
+            `
+            ,   (err, result) => {
+                    if (err) {
+                        console.error('Error executing query', err);
+                        reject(err);
+                    } else {
+                        resolve(result.rows);
+                    }
+                });
+        });
+        }
 
     function getTop3(idList){
         return new Promise((resolve, reject) => {
@@ -387,7 +345,6 @@ exports.addToRecord = addToRecord;
 exports.recordById = recordById;
 exports.addCharacter = addCharacter;
 exports.addLeaderboard = addLeaderboard;
-exports.characterAlreadyInALeaderboardById = characterAlreadyInALeaderboardById;
 exports.updateRecordById = updateRecordById;
 exports.getTop3 = getTop3;
 exports.getCharacterListOfLeaderboardMainOrAlt = getCharacterListOfLeaderboardMainOrAlt;
