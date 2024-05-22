@@ -1,24 +1,25 @@
 import { Outlet, Link } from "react-router-dom";
 import React, {useEffect, useState, useRef} from 'react';
-import AddRoster from "../Components/AddRoster/AddRoster";
+import AddCharacter from "../Components/AddCharacter/AddCharacter";
 const initSqlJs = require('sql.js');
 
 const CreateLeaderboardPage = () => {
-   const [rosters, setRosters] = useState([{ rosterName: '', region: '', characters: []}]);
+   const [characters, setCharacters] = useState([{ name: '', class: '', main: false }]);
  
-   const addRoster = () => {
-      setRosters([...rosters, { rosterName: '', region: '', characters:[]}]);
+   const addCharacter = () => {
+      setCharacters([...characters, { name: '', class: '', main: false }]);
     };
+  
 
    const sendLeaderboardData = () => {
-      console.log(rosters);
+      console.log(characters);
       fetch(
 			`http://localhost:3001/create`
 			,
 			{
 				method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({rosters: rosters}),
+				body: JSON.stringify({characters: characters}),
 
 			})
 			.then((response) => response.json()
@@ -33,10 +34,10 @@ const CreateLeaderboardPage = () => {
 
    return(
     <>
-    {rosters.map((character, index) => {
-        return <AddRoster key={index} roster={rosters[index]}/>
+    {characters.map((character, index) => {
+        return <AddCharacter key={index} character={characters[index]}/>
       })}
-      <button onClick={e => addRoster()}>Add New Roster</button>
+      <button onClick={e => addCharacter()}>Add New Character</button>
       <button onClick={e => sendLeaderboardData()}>Submit</button>
     </>
    )
