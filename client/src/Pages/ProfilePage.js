@@ -117,7 +117,7 @@
   
           if (nameDpsIdDate[0] !== undefined) {
             const highestDps = nameDpsIdDate[0].values[0][1];
-            if (highestDps > (player.dps || 0)) {
+            if (highestDps > player.dps) {
                 const playerInfo = db.exec(`
                     SELECT e.name, e.dps, e.encounter_id, en.last_combat_packet,
                         CASE
@@ -198,7 +198,6 @@
     useEffect(() => {
       if (characterList === null) {
         getCharacterList();
-        console.log(characterList);
       }
     }, [characterList]);
   

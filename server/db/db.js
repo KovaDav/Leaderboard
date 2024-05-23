@@ -364,6 +364,7 @@ function getTop3PerformersByDPS(leaderboardid, main) {
             record r ON r.characterid = c.id
         WHERE
             lc.leaderboardid = $1
+            AND c.class NOT IN ('Bard', 'Artist', 'Paladin')
         GROUP BY
             c.name, r.bossname, r.difficulty, r.dps
         ORDER BY
