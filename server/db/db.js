@@ -165,25 +165,33 @@ function addToRecord(id, dps, support, boss, difficulty, cleardate){
 });  
 }
 
-function updateRecordById(id, dps, support, boss, difficulty, date){
+function updateRecordById(dps, name, boss, difficulty, support, cleardate) {
     return new Promise((resolve, reject) => {
-    client.query(`UPDATE record
-    SET  
-    dps = '${dps}',
-    support = '${support}',
-    date = '${date}'
-    WHERE characterid = '${id}'
-    AND boss = '${boss}'
-    AND difficulty = '${difficulty}';`
-     ,   (err, result) => {
-        if (err) {
-            console.error('Error executing query', err);
-            reject(err); // Reject the promise with the error
-        } else {
-            resolve(result.rows); // Resolve the promise with the query result
-        }
+        const query = `
+        UPDATE record
+        SET dps = $1,
+        support = $5,
+        cleardate = $6
+        WHERE characterid = (
+            SELECT id
+            FROM character
+            WHERE name = $2
+        )
+        AND bossname = $3
+        AND difficulty = $4
+        AND dps < $1;
+        `;
+        const values = [dps, name, boss, difficulty, support, cleardate];
+
+        client.query(query, values, (err, result) => {
+            if (err) {
+                console.error('Error executing query', err);
+                reject(err); // Reject the promise with the error
+            } else {
+                resolve(result.rows); // Resolve the promise with the query result
+            }
+        });
     });
-});  
 }
 
 function findCharacterById(id){

@@ -73,6 +73,7 @@ const ProfilePage = () => {
      }, []);
  
      const changeHandler = (e) => {
+        console.log(characterList);
          if (!SQL) {
              setError("SQL.js is not initialized");
              return;
@@ -105,75 +106,86 @@ const ProfilePage = () => {
 
       
 
-      const dpsPBList = [];
 
-      bossList.forEach(boss => { 
-          console.log(boss[0]);
-      characterList.forEach(player => {
-         let nameDpsIdDate = db.exec(`SELECT e.name, e.dps,e.encounter_id, en.last_combat_packet
-         FROM entity e
-         INNER JOIN encounter en ON e.encounter_id = en.id
-         WHERE e.name = '${player}'
-         AND en.id IN (
-             SELECT id FROM encounter
-             WHERE json_extract(misc, '$.partyInfo') LIKE '%"${player}"%'
-             AND current_boss = '${boss[0]}'
-             AND difficulty = '${boss[1]}'
-             AND json_extract(misc, '$.raidClear') = true
-         )
-         ORDER BY e.dps DESC
-         LIMIT 1;`);
-         console.log(nameDpsIdDate[0]);
-          if(nameDpsIdDate[0] !== undefined){
 
-          let partyInfo = db.exec(`SELECT 
-          id,
-              CASE
-                  WHEN json_extract(misc, '$.partyInfo.0') LIKE '%"${player}"%' THEN json_extract(misc, '$.partyInfo.0')
-                  WHEN json_extract(misc, '$.partyInfo.1') LIKE '%"${player}"%' THEN json_extract(misc, '$.partyInfo.1')
-                  ELSE NULL
-              END AS containing_key
-          FROM encounter 
-          WHERE id = '${nameDpsIdDate[0].values[0][2]}';
-          `)
-          let hasSupport = true;
-          let support = db.exec(`
-          select name from entity where encounter_id = '${nameDpsIdDate[0].values[0][2]}' 
-          and name in ('${JSON.parse(partyInfo[0].values[0][1])[0]}','${JSON.parse(partyInfo[0].values[0][1])[1]}','${JSON.parse(partyInfo[0].values[0][1])[2]}','${JSON.parse(partyInfo[0].values[0][1])[3]}') and class in ('Bard', 'Paladin', 'Artist');
-          `)
-          
-          support[0] === undefined ? hasSupport = false : hasSupport = true;
-
-          sendPlayerData(JSON.stringify({
-              name: nameDpsIdDate[0].values[0][0], 
-              dps: nameDpsIdDate[0].values[0][1], 
-              date: nameDpsIdDate[0].values[0][3], 
-              support: hasSupport ? support[0].values[0][0] : 'NoSupport',
-              boss: boss[0],
-              difficulty: boss[1]
-          })) 
-          }
-          else{
-          sendPlayerData(JSON.stringify({
-              name: player,
-              dps: 0,
-              date: 0,
-              support: '',
-              boss: boss[0],
-              difficulty: boss[1]
-          })) 
-          } 
-      });
-      
-  }); 
-  console.log(dpsPBList);
+         bossList.forEach(boss => { 
+            console.log(boss[0]);
+            characterList.forEach(player => {
+                let nameDpsIdDate = db.exec(`SELECT e.name, e.dps,e.encounter_id, en.last_combat_packet
+                FROM entity e
+                INNER JOIN encounter en ON e.encounter_id = en.id
+                WHERE e.name = '${player.charactername}'
+                AND en.id IN (
+                    SELECT id FROM encounter
+                    WHERE json_extract(misc, '$.partyInfo') LIKE '%"${player.charactername}"%'
+                    AND current_boss = '${boss[0]}'
+                    AND difficulty = '${boss[1]}'
+                    AND json_extract(misc, '$.raidClear') = true
+                )
+                ORDER BY e.dps DESC
+                LIMIT 1;`);
+        
+                if (nameDpsIdDate[0] !== undefined) {
+                    let partyInfo = db.exec(`SELECT 
+                        id,
+                        CASE
+                            WHEN json_extract(misc, '$.partyInfo.0') LIKE '%"${player.charactername}"%' THEN json_extract(misc, '$.partyInfo.0')
+                            WHEN json_extract(misc, '$.partyInfo.1') LIKE '%"${player.charactername}"%' THEN json_extract(misc, '$.partyInfo.1')
+                            ELSE NULL
+                        END AS containing_key
+                    FROM encounter 
+                    WHERE id = '${nameDpsIdDate[0].values[0][2]}';
+                    `);
+        
+                    let hasSupport = true;
+                    let support = db.exec(`
+                        SELECT name FROM entity WHERE encounter_id = '${nameDpsIdDate[0].values[0][2]}' 
+                        AND name IN ('${JSON.parse(partyInfo[0].values[0][1])[0]}', '${JSON.parse(partyInfo[0].values[0][1])[1]}', '${JSON.parse(partyInfo[0].values[0][1])[2]}', '${JSON.parse(partyInfo[0].values[0][1])[3]}') 
+                        AND class IN ('Bard', 'Paladin', 'Artist');
+                    `);
+        
+                    if (support[0] === undefined) {
+                        hasSupport = false;
+                    }
+        
+                    sendPlayerData(
+                        {
+                            name: nameDpsIdDate[0].values[0][0],
+                            dps: nameDpsIdDate[0].values[0][1],
+                            date: nameDpsIdDate[0].values[0][3],
+                            support: hasSupport ? support[0].values[0][0] : 'NoSupport',
+                            boss: boss[0],
+                            difficulty: boss[1]
+                        }
+                    );
+                } else {
+                    sendPlayerData(
+                        {
+                            name: player.charactername,
+                            dps: 0,
+                            date: 0,
+                            support: '',
+                            boss: boss[0],
+                            difficulty: boss[1]
+                        }
+                    );
+                }
+            });
+        });
      };
      const sendPlayerData = (data) =>{
       fetch(
-       `http://localhost:3001/dps?data=${data}`
+       `http://localhost:3001/dps`
        ,
        {
-          method: 'GET',
+          method: 'POST',
+          headers: {
+            "Content-Type": "application/json",
+          },
+        body: JSON.stringify(
+        {
+                data: JSON.stringify(data),
+        }),
        })
        .then((response) => response.json()
        )
@@ -196,14 +208,13 @@ const ProfilePage = () => {
                },
              body: JSON.stringify(
              {
-                     leaderboardId: "ab1de84c-4c73-4d1d-9bd1-7ba743a36cf2",
+                     leaderboardId: "8",
              }),
          })
          .then((response) => response.json()
          )
          .then((result) => {	
-             setCharacterList(JSON.parse(result))
-             console.log(characterList);
+            setCharacterList(JSON.parse(result))
          })
          .catch((error) => {
              console.error('Error:', error);

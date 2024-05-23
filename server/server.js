@@ -60,24 +60,12 @@ app.use(express.json());
 app.use(cors());
   
 
-app.get('/dps', async (req, res) => {
+app.post('/dps', async (req, res) => {
     
-    const data = JSON.parse(req.query.data);
-    const result = await findCharacterIdByName(data.name)
-    const id = result[0].characterid
-    const record = await recordById(id, data.boss, data.difficulty)
-
-    if(record[0].dps >= data.dps){
-        res.json({ message: `Has higher record than this` })
-        console.log(record[0].dps, data.dps, data.boss, data.name, data.difficulty );
-    }else if(record[0].dps < data.dps){
-        console.log('updating');
-        console.log(await updateRecordById(id, data.dps, data.support, data.boss, data.difficulty, data.date))
-        res.json({ message: `Updated existing record` });
-    }else{
-        await addToRecord(id, data.dps, data.support, data.boss, data.difficulty, data.date);
-        res.json({ message: `Added new record` });
-    }
+    const record = JSON.parse(req.body.data);
+    console.log(record);
+        console.log(await updateRecordById(record.dps, record.name, record.boss, record.difficulty, record.support, record.date))
+    res.json({"ok" : "ok"})
 });
 
 app.post('/create', async (req, res) => {

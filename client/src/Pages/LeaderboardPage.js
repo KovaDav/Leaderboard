@@ -69,8 +69,8 @@ const LeaderboardPage = () => {
                       },
                     body: JSON.stringify(
                     {
-                            leaderboardId: "7",
-                            leaderboardMains: false
+                            leaderboardId: "8",
+                            leaderboardMains: true
                     }),
                 })
                 .then((response) => response.json()
