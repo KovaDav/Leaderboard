@@ -351,14 +351,23 @@ function getTop3PerformersByDPS(leaderboardid, main) {
     function getCharacterListOfLeaderboard(leaderboardid) {
         return new Promise((resolve, reject) => {
             const query = `
-                SELECT
-                    c.name AS charactername
-                FROM
-                    leaderboard_character lc
-                JOIN
-                    character c ON lc.characterid = c.id
-                WHERE
-                    lc.leaderboardid = $1;
+            SELECT
+            c.name AS charactername,
+            r.bossname,
+            r.difficulty,
+            r.dps
+        FROM
+            leaderboard_character lc
+        JOIN
+            character c ON lc.characterid = c.id
+        LEFT JOIN
+            record r ON r.characterid = c.id
+        WHERE
+            lc.leaderboardid = $1
+        GROUP BY
+            c.name, r.bossname, r.difficulty, r.dps
+        ORDER BY
+            r.bossname, r.difficulty, r.dps DESC;
             `;
             const values = [leaderboardid];
     
