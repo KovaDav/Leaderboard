@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const {getCharacterData} = require("./LeaderboardCreator/findTop3DPS.js")
-const {findCharacterIdByName, addToRecord, recordById, addCharacter, addLeaderboard, updateRecordById, getTop3,
+const {findCharacterIdByName, addToRecord, recordById, addCharacter, addLeaderboard, updateRecordById, getTop3PerformersByDPS,
      getCharacterListOfLeaderboardMainOrAlt, getCharacterListOfLeaderboard, characterExists, addCharactersToLeaderboard} = require("./db/db.js")
 const bossList = [
     ['Killineza the Dark Worshipper', 'Hard'],
@@ -117,12 +117,7 @@ app.post('/leaderboard', async (req, res) => {
     const leaderboardId = req.body.leaderboardId;
     const leaderboardMain = req.body.leaderboardMains;
     try {
-        const characterList = await getCharacterListOfLeaderboardMainOrAlt(leaderboardId,leaderboardMain)
-        const idList = []
-        characterList.forEach(character => {
-            idList.push(character.characterid)
-        });
-        const leaderboardData = await getTop3(idList)
+        const leaderboardData = await getTop3PerformersByDPS(leaderboardId,leaderboardMain)
         res.json(JSON.stringify(leaderboardData));
     } catch (error) {
         console.error('Error:', error);

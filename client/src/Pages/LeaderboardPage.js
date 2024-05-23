@@ -69,13 +69,14 @@ const LeaderboardPage = () => {
                       },
                     body: JSON.stringify(
                     {
-                            leaderboardId: "ab1de84c-4c73-4d1d-9bd1-7ba743a36cf2",
-                            leaderboardMains: false
+                            leaderboardId: "4",
+                            leaderboardMains: true
                     }),
                 })
                 .then((response) => response.json()
                 )
                 .then((result) => {	
+                    console.log(result);
                     setLeaderboardData(JSON.parse(result))
                 })
                 .catch((error) => {

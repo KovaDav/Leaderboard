@@ -21,25 +21,25 @@ client
 	});
 
 
-
-
-function addCharacter(characterName, characterClass, main, region){
-return new Promise((resolve, reject) => {
-    client.query(
-    `INSERT INTO Character (name, class, main, region)
-    VALUES ('${characterName}', '${characterClass}', '${main}', '${region}')
-    RETURNING id;`
-    ,   (err, result) => {
-            if (err) {
-                console.error('Error executing query', err);
-                reject(err); // Reject the promise with the error
-            } else {
-                console.log('OK', "OK")
-                resolve(result.rows); // Resolve the promise with the query result
-            }
+    function addCharacter(characterName, characterClass, main, region) {
+        return new Promise((resolve, reject) => {
+            const query = `
+                INSERT INTO Character (name, class, main, region)
+                VALUES ($1, $2, $3, $4)
+                RETURNING id;
+            `;
+            const values = [characterName, characterClass, main, region];
+    
+            client.query(query, values, (err, result) => {
+                if (err) {
+                    console.error('Error executing query', err);
+                    reject(err); // Reject the promise with the error
+                } else {
+                    resolve(result.rows); // Resolve the promise with the query result
+                }
+            });
         });
-});
-}
+    }
 
 
 
@@ -257,52 +257,56 @@ function characterExists(name, region){
         });
         }
 
-    function getTop3(idList){
-        return new Promise((resolve, reject) => {
-            const idString = idList.map(id => `'${id}'`).join(', ');
-            client.query(`WITH ranked_records AS (
-                SELECT
-                    r.characterid,
-                    r.dps,
-                    r.support,
-                    r.boss,
-                    r.difficulty,
-                    r.date,
-                    ROW_NUMBER() OVER (PARTITION BY r.boss, r.difficulty ORDER BY r.dps DESC) AS rank,
-                    c.charactername  -- Include charactername from the character table
-                FROM
-                    record r
-                JOIN
-                    character c ON r.characterid = c.characterid  -- Join with the character table
-                WHERE
-                    r.characterid IN (${idString})
-            )
-            SELECT
-                characterid,
-                charactername,
-                dps,
-                support,
-                boss,
-                difficulty,
-                date
-            FROM
-                ranked_records
-            WHERE
-                rank <= 3
-            ORDER BY
-                boss,
-                difficulty,
-                rank;`
-            ,   (err, result) => {
+function getTop3PerformersByDPS(leaderboardid, main) {
+            return new Promise((resolve, reject) => {
+                const query = `
+                    WITH ranked_records AS (
+                        SELECT
+                            rc.characterid,
+                            rc.dps,
+                            rc.bossname,
+                            rc.difficulty,
+                            rc.date,
+                            ROW_NUMBER() OVER (PARTITION BY rc.bossname, rc.difficulty ORDER BY rc.dps DESC) AS rank
+                        FROM
+                            leaderboard_character lc
+                        JOIN
+                            record rc ON lc.characterid = rc.characterid
+                        JOIN
+                            character c ON rc.characterid = c.id
+                        WHERE
+                            lc.leaderboardid = $1
+                            AND c.main = $2
+                    )
+                    SELECT
+                        rr.characterid,
+                        rr.dps,
+                        rr.bossname,
+                        rr.difficulty,
+                        rr.date
+                    FROM
+                        ranked_records rr
+                    WHERE
+                        rr.rank <= 3
+                    ORDER BY
+                        rr.bossname,
+                        rr.difficulty,
+                        rr.rank;
+                `;
+                const values = [leaderboardid, main];
+        
+                client.query(query, values, (err, result) => {
                     if (err) {
                         console.error('Error executing query', err);
-                        reject(err);
+                        reject(err); // Reject the promise with the error
                     } else {
-                        resolve(result.rows);
+                        resolve(result.rows); // Resolve the promise with the query result
                     }
                 });
-        });
-    }
+            });
+}
+       
+        
 
     function getCharacterListOfLeaderboardMainOrAlt(leaderboardId, main){
         return new Promise((resolve, reject) => {
@@ -370,7 +374,7 @@ exports.recordById = recordById;
 exports.addCharacter = addCharacter;
 exports.addLeaderboard = addLeaderboard;
 exports.updateRecordById = updateRecordById;
-exports.getTop3 = getTop3;
+exports.getTop3PerformersByDPS = getTop3PerformersByDPS;
 exports.getCharacterListOfLeaderboardMainOrAlt = getCharacterListOfLeaderboardMainOrAlt;
 exports.getCharacterListOfLeaderboard = getCharacterListOfLeaderboard;
 exports.characterExists = characterExists;
