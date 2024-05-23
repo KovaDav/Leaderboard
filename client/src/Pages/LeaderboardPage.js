@@ -69,8 +69,8 @@ const LeaderboardPage = () => {
                       },
                     body: JSON.stringify(
                     {
-                            leaderboardId: "4",
-                            leaderboardMains: true
+                            leaderboardId: "6",
+                            leaderboardMains: false
                     }),
                 })
                 .then((response) => response.json()
@@ -85,13 +85,13 @@ const LeaderboardPage = () => {
       },[])
 
     const LeaderboardGenerator = () => {
-        return bossList.map(boss => <LeaderboardGrid title={boss} data={getSpecificBossData(boss)}/>)
+        return bossList.map(boss => <LeaderboardGrid title={boss} data={getSpecificBossData(boss)} key={`${boss[0]},${boss[1]}`}/>)
      }
 
     const getSpecificBossData = (boss) => {
         const result = []
         leaderboardData.forEach(record => {
-            if(record.boss === boss[0] && record.difficulty === boss[1]){
+            if(record.bossname === boss[0] && record.difficulty === boss[1]){
                 result.push(record)
             }
         });

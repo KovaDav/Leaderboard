@@ -260,38 +260,41 @@ function characterExists(name, region){
 function getTop3PerformersByDPS(leaderboardid, main) {
             return new Promise((resolve, reject) => {
                 const query = `
-                    WITH ranked_records AS (
-                        SELECT
-                            rc.characterid,
-                            rc.dps,
-                            rc.bossname,
-                            rc.difficulty,
-                            rc.date,
-                            ROW_NUMBER() OVER (PARTITION BY rc.bossname, rc.difficulty ORDER BY rc.dps DESC) AS rank
-                        FROM
-                            leaderboard_character lc
-                        JOIN
-                            record rc ON lc.characterid = rc.characterid
-                        JOIN
-                            character c ON rc.characterid = c.id
-                        WHERE
-                            lc.leaderboardid = $1
-                            AND c.main = $2
-                    )
+                WITH ranked_records AS (
                     SELECT
-                        rr.characterid,
-                        rr.dps,
-                        rr.bossname,
-                        rr.difficulty,
-                        rr.date
+                        c.name AS charactername,
+                        rc.dps,
+                        rc.support,
+                        rc.bossname,
+                        rc.difficulty,
+                        rc.date,
+                        ROW_NUMBER() OVER (PARTITION BY rc.bossname, rc.difficulty ORDER BY rc.dps DESC) AS rank
                     FROM
-                        ranked_records rr
+                        leaderboard_character lc
+                    JOIN
+                        record rc ON lc.characterid = rc.characterid
+                    JOIN
+                        character c ON rc.characterid = c.id
                     WHERE
-                        rr.rank <= 3
-                    ORDER BY
-                        rr.bossname,
-                        rr.difficulty,
-                        rr.rank;
+                        lc.leaderboardid = $1
+                        AND c.main = $2
+                )
+                SELECT
+                    rr.charactername,
+                    rr.dps,
+                    rr.support,
+                    rr.bossname,
+                    rr.difficulty,
+                    rr.date
+                FROM
+                    ranked_records rr
+                WHERE
+                    rr.rank <= 3
+                ORDER BY
+                    rr.bossname,
+                    rr.difficulty,
+                    rr.rank;
+                
                 `;
                 const values = [leaderboardid, main];
         
