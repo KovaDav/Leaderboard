@@ -69,7 +69,7 @@ const LeaderboardPage = () => {
                       },
                     body: JSON.stringify(
                     {
-                            leaderboardId: "6",
+                            leaderboardId: "7",
                             leaderboardMains: false
                     }),
                 })

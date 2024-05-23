@@ -150,10 +150,10 @@ function addCharactersToLeaderboard(leaderboardid, characters){
     });
     }
 
-function addToRecord(id, dps, support, boss, difficulty){
+function addToRecord(id, dps, support, boss, difficulty, cleardate){
     return new Promise((resolve, reject) => {
-    client.query(`INSERT INTO record (characterid, bossname, difficulty, dps, support)
-     VALUES('${id}', '${boss}', '${difficulty}', '${dps}', '${support}');`
+    client.query(`INSERT INTO record (characterid, bossname, difficulty, dps, support, cleardate)
+     VALUES('${id}', '${boss}', '${difficulty}', '${dps}', '${support}', '${cleardate}');`
      ,   (err, result) => {
         if (err) {
             console.error('Error executing query', err);
@@ -340,31 +340,28 @@ function getTop3PerformersByDPS(leaderboardid, main) {
         });
     }
 
-    function getCharacterListOfLeaderboard(leaderboardId){
+    function getCharacterListOfLeaderboard(leaderboardid) {
         return new Promise((resolve, reject) => {
-            client.query(`SELECT
-            c.characterid,
-            c.charactername,
-            c.characterclass,
-            c.main,
-            c.region,
-            c.rostername
-        FROM
-            leaderboard l
-        JOIN
-            unnest(l.characterid) AS lcharacterid ON TRUE
-        JOIN
-            character c ON lcharacterid = c.characterid
-        WHERE
-            l.leaderboardid = '${leaderboardId}';`
-            ,   (err, result) => {
-                    if (err) {
-                        console.error('Error executing query', err);
-                        reject(err);
-                    } else {
-                        resolve(result.rows);
-                    }
-                });
+            const query = `
+                SELECT
+                    c.name AS charactername
+                FROM
+                    leaderboard_character lc
+                JOIN
+                    character c ON lc.characterid = c.id
+                WHERE
+                    lc.leaderboardid = $1;
+            `;
+            const values = [leaderboardid];
+    
+            client.query(query, values, (err, result) => {
+                if (err) {
+                    console.error('Error executing query', err);
+                    reject(err); // Reject the promise with the error
+                } else {
+                    resolve(result.rows); // Resolve the promise with the query result
+                }
+            });
         });
     }
 

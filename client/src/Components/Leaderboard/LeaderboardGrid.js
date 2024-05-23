@@ -2,14 +2,10 @@ import React, { useState } from 'react';
 import "./LeaderboardGrid.css"
 
 const LeaderboardGrid = ({ title, data }) => {
-    
-    console.log(title, data);
-
-
     return (
         <>
-    {(data === null || data[0].dps !== 1 )  &&<div id="LeaderboardGrid">
-      <h3 id="Title" className="Grid">{title[0]+title[1]}</h3>
+    {(data === null || data[0].dps !== 0 )  &&<div id="LeaderboardGrid">
+      <h3 id="Title" className="Grid">{`${title[0]} | ${title[1]}`}</h3>
       <p id="HeaderName" className="Grid">name</p>
       <p id="HeaderDPS" className="Grid">DPS</p>
       <p id="HeaderSupport" className="Grid">support</p>

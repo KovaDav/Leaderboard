@@ -97,14 +97,12 @@ app.post('/create', async (req, res) => {
                 existingCharacterIdList.push(id[0].id)
             }
         }
-        console.log(characterIdList);
         for (const id of characterIdList) {
             for (const boss of bossList) {
-                await addToRecord(id, 0, 'noSupp',  boss[0], boss[1])
+                await addToRecord(id, 0, 'noSupp',  boss[0], boss[1], 0)
             }
         }
         const leaderboardId = await addLeaderboard()
-        console.log(leaderboardId[0].id);
         const result = await addCharactersToLeaderboard(leaderboardId[0].id, characterIdList.concat(existingCharacterIdList))
         res.json(leaderboardId);
     } catch (error) {
@@ -129,11 +127,7 @@ app.post('/characters', async (req, res) => {
     const leaderboardId = req.body.leaderboardId;
     try {
         const characterList = await getCharacterListOfLeaderboard(leaderboardId)
-        const nameList = []
-        characterList.forEach(character => {
-            nameList.push(character.charactername)
-        });
-        res.json(JSON.stringify(nameList));
+        res.json(JSON.stringify(characterList));
     } catch (error) {
         console.error('Error:', error);
         res.status(500).json({ error: 'Internal server error' });
