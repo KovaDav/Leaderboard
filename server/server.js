@@ -57,7 +57,10 @@ const bossList = [
     ['Ravaged Tyrant of Beasts', 'Normal'],
 ]
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:3000', // Your React app's URL
+    credentials: true
+  }));
   
 
 app.post('/dps', async (req, res) => {
