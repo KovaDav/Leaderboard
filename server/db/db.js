@@ -41,6 +41,55 @@ client
         });
     }
 
+    function login(username) {
+        return new Promise((resolve, reject) => {
+            const query = `SELECT * FROM users WHERE username = $1`;
+            const values = [username];
+    
+            client.query(query, values, (err, result) => {
+                if (err) {
+                    console.error('Error executing query', err);
+                    reject(err); // Reject the promise with the error
+                } else {
+                    resolve(result.rows); // Resolve the promise with the query result
+                }
+            });
+        });
+    }
+
+    function serialize(id) {
+        return new Promise((resolve, reject) => {
+            const query = `SELECT * FROM users WHERE id = $1`;
+            const values = [id];
+    
+            client.query(query, values, (err, result) => {
+                if (err) {
+                    console.error('Error executing query', err);
+                    reject(err); // Reject the promise with the error
+                } else {
+                    resolve(result.rows); // Resolve the promise with the query result
+                }
+            });
+        });
+    }
+
+    function register(username, hashedPassword) {
+        return new Promise((resolve, reject) => {
+            const query = `INSERT INTO users (username, password) VALUES ($1, $2) RETURNING *`;
+            const values = [username, hashedPassword];
+    
+            client.query(query, values, (err, result) => {
+                if (err) {
+                    console.error('Error executing query', err);
+                    reject(err); // Reject the promise with the error
+                } else {
+                    resolve(result.rows); // Resolve the promise with the query result
+                }
+            });
+        });
+    }
+
+
 
 
 function getListOfPlayersMains(leaderboardID) {
@@ -397,3 +446,6 @@ exports.getCharacterListOfLeaderboardMainOrAlt = getCharacterListOfLeaderboardMa
 exports.getCharacterListOfLeaderboard = getCharacterListOfLeaderboard;
 exports.characterExists = characterExists;
 exports.addCharactersToLeaderboard = addCharactersToLeaderboard;
+exports.login = login;
+exports.serialize = serialize;
+exports.register = register;

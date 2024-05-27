@@ -4,6 +4,12 @@ const cors = require("cors");
 const {getCharacterData} = require("./LeaderboardCreator/findTop3DPS.js")
 const {findCharacterIdByName, addToRecord, recordById, addCharacter, addLeaderboard, updateRecordById, getTop3PerformersByDPS,
      getCharacterListOfLeaderboardMainOrAlt, getCharacterListOfLeaderboard, characterExists, addCharactersToLeaderboard} = require("./db/db.js")
+
+const authRoutes = require('./routes/authRoutes');
+const { initializePassport } = require('./config/passportConfig.js');
+const session = require('express-session');
+const passport = require('passport');
+
 const bossList = [
     ['Killineza the Dark Worshipper', 'Hard'],
     ['Valinak, Herald of the End', 'Hard'],
@@ -56,12 +62,21 @@ const bossList = [
     ['Dark Mountain Predator', 'Normal'],
     ['Ravaged Tyrant of Beasts', 'Normal'],
 ]
+
+
 app.use(express.json());
 app.use(cors({
-    origin: 'http://localhost:3000', // Your React app's URL
+    origin: 'http://localhost:3000',
     credentials: true
-  }));
-  
+}));
+app.use(session({ secret: 'your_secret', resave: false, saveUninitialized: true }));
+app.use(passport.initialize());
+app.use(passport.session());
+app.use('/auth', authRoutes);
+initializePassport(passport);
+
+
+
 
 app.post('/dps', async (req, res) => {
     

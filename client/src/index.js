@@ -7,6 +7,8 @@ import Layout from "./Pages/Layout/Layout.js";
 import LeaderboardPage from './Pages/LeaderboardPage.js';
 import CreateLeaderboardPage from './Pages/CreateLeaderboardPage.js';
 import ProfilePage from './Pages/ProfilePage.js';
+import LoginPage from './Pages/LoginPage.js'
+import RegisterPage from './Pages/RegisterPage.js'
 const router = createBrowserRouter([
   {
   path: "/",
@@ -23,6 +25,14 @@ const router = createBrowserRouter([
     {
       path: "/profile",
       element : <ProfilePage />
+    },
+    {
+      path: "/login",
+      element : <LoginPage />
+    },
+    {
+      path: "/register",
+      element : <RegisterPage />
     }
   ]
 }
