@@ -69,13 +69,35 @@ app.use(cors({
     origin: 'http://localhost:3000',
     credentials: true
 }));
-app.use(session({ secret: 'your_secret', resave: false, saveUninitialized: true }));
+app.use(session({ secret: 'your_secret', resave: false, saveUninitialized: true,cookie: { secure: false } }));
 app.use(passport.initialize());
 app.use(passport.session());
 app.use('/auth', authRoutes);
 initializePassport(passport);
 
+const ensureAuthenticated = (req, res, next) => {
+    if (req.isAuthenticated()) {
+      return next();
+    }
+    res.status(401).json({ message: 'Unauthorized' });
+};
 
+app.get('/protected', ensureAuthenticated, (req, res) => {
+    res.json({ message: 'This is a protected route' });
+  });
+
+app.post('/logout', (req, res) => {
+    req.logout();
+    res.json({ success: true });
+  });
+
+app.get('/status', (req, res) => {
+    if (req.isAuthenticated()) {
+      res.json({ user: req.user });
+    } else {
+      res.status(401).json({ user: null });
+    }
+  });
 
 
 app.post('/dps', async (req, res) => {

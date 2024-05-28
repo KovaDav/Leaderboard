@@ -3,52 +3,51 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import Layout from "./Pages/Layout/Layout.js";
-import LeaderboardPage from './Pages/LeaderboardPage.js';
-import CreateLeaderboardPage from './Pages/CreateLeaderboardPage.js';
-import ProfilePage from './Pages/ProfilePage.js';
-import LoginPage from './Pages/LoginPage.js'
-import RegisterPage from './Pages/RegisterPage.js'
+import Layout from "./Pages/Layout/Layout";
+import LeaderboardPage from './Pages/LeaderboardPage';
+import CreateLeaderboardPage from './Pages/CreateLeaderboardPage';
+import ProfilePage from './Pages/ProfilePage';
+import LoginPage from './Pages/LoginPage';
+import RegisterPage from './Pages/RegisterPage';
+import { AuthProvider } from './Auth/AuthContext';
+import ProtectedRoute from './Auth/ProtectedRoute';
+
 const router = createBrowserRouter([
   {
-  path: "/",
-  element: <Layout />,
-  children:[
-    {
-      path: "/leaderboard",
-      element: <LeaderboardPage />
-    },
-    {
-      path: "/create",
-      element: <CreateLeaderboardPage />
-    },
-    {
-      path: "/profile",
-      element : <ProfilePage />
-    },
-    {
-      path: "/login",
-      element : <LoginPage />
-    },
-    {
-      path: "/register",
-      element : <RegisterPage />
-    }
-  ]
-}
-  ]
-      
-    
-);
+    path: "/",
+    element: <Layout />,
+    children:[
+      {
+        path: "/leaderboard",
+        element: <LeaderboardPage />
+      },
+      {
+        path: "/create",
+        element: <ProtectedRoute element={CreateLeaderboardPage} />
+      },
+      {
+        path: "/profile",
+        element : <ProtectedRoute element={ProfilePage} />
+      },
+      {
+        path: "/login",
+        element : <LoginPage />
+      },
+      {
+        path: "/register",
+        element : <RegisterPage />
+      }
+    ]
+  }
+]);
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
   </React.StrictMode>
 );
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();
