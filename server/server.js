@@ -69,13 +69,18 @@ app.use(cors({
     origin: 'http://localhost:3000',
     credentials: true
 }));
-app.use(session({ secret: 'your_secret', resave: false, saveUninitialized: true,cookie: { secure: false } }));
+app.use(session({ secret: 'your_secret', resave: false, saveUninitialized: true,cookie: {
+    secure: false, // Set to true if using https
+    httpOnly: true,
+    sameSite: 'lax', // Adjust based on your needs
+  } }));
 app.use(passport.initialize());
 app.use(passport.session());
 app.use('/auth', authRoutes);
 initializePassport(passport);
 
 const ensureAuthenticated = (req, res, next) => {
+    console.log(req.isAuthenticated());
     if (req.isAuthenticated()) {
       return next();
     }
@@ -84,19 +89,6 @@ const ensureAuthenticated = (req, res, next) => {
 
 app.get('/protected', ensureAuthenticated, (req, res) => {
     res.json({ message: 'This is a protected route' });
-  });
-
-app.post('/logout', (req, res) => {
-    req.logout();
-    res.json({ success: true });
-  });
-
-app.get('/status', (req, res) => {
-    if (req.isAuthenticated()) {
-      res.json({ user: req.user });
-    } else {
-      res.status(401).json({ user: null });
-    }
   });
 
 

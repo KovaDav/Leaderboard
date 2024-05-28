@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
-
+import axios from 'axios';
 
 const AuthContext = createContext();
 
@@ -8,66 +8,35 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
+  const axiosInstance = axios.create({
+    baseURL: 'http://localhost:3001',
+    withCredentials: true
+  });
+ 
     const checkAuthStatus = async () => {
       try {
-        fetch(
-            `http://localhost:3001/status`,
-            {
-              method: 'GET',
-            })
-            .then((response) => response.json())
-            .then((result) => {
-              setUser(result.user)
-            })
-            .catch((error) => {
-              console.error('Error:', error);
-            });
-      } catch (error) {
+        const response = await axiosInstance.get('/auth/status');
+        setUser(response.data.user);
+      } catch (error) {   
         setUser(null);
       } finally {
         setLoading(false);
       }
     };
+  
+useEffect(() => {
     checkAuthStatus();
-  }, []);
+},[]);
 
   const login = async (username, password) => {
-    fetch(
-        `http://localhost:3001/auth/login`,
-        {
-          method: 'POST',
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ username: username, password: password }),
-        })
-        .then((response) => response.json())
-        .then((result) => {
-            setUser(result.user)
-        })
-        .catch((error) => {
-          console.error('Error:', error);
-        });
+    await axiosInstance.post('/auth/login', { username, password });
+    await checkAuthStatus();
   };
 
   const logout = async () => {
-       fetch(
-        `http://localhost:3001/logout`,
-        {
-          method: 'POST',
-          headers: {
-            "Content-Type": "application/json",
-          },
-        })
-        .then((response) => response.json())
-        .then((result) => {
-            setUser(null)
-        })
-        .catch((error) => {
-          console.error('Error:', error);
-        });
+    await axiosInstance.post('/auth/logout');
+    setUser(null)
+    await checkAuthStatus();
   };
 
   return (

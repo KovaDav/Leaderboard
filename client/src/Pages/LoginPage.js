@@ -1,35 +1,21 @@
 import React, { useState } from 'react';
+import {useAuth} from '../Auth/AuthContext'
+import { useNavigate } from 'react-router-dom';
 
-
-const Login = () => {
+const LoginPage = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-    fetch(
-        `http://localhost:3001/auth/login`,
-        {
-            method: 'POST',
-            headers: {
-            "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ username: username, password: password }),
-        })
-        .then((response) => response.json())
-        .then((result) => {
-            console.log(result);
-            if (result.success) {
-                console.log('success')
-            }
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-        });
-      
-    } catch (error) {
-      console.error('Login failed:', error);
+      await login(username, password);
+      console.log('Login successful, navigating to profile...');
+      navigate('/profile');
+    } catch (err) {
+      console.error('Login failed', err);
     }
   };
 
@@ -48,4 +34,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default LoginPage;

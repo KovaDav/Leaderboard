@@ -1,7 +1,7 @@
   import { Outlet, Link } from "react-router-dom";
+  import {useAuth} from '../Auth/AuthContext'
   import React, { useEffect, useState, useRef } from 'react';
   const initSqlJs = require('sql.js');
-  
   const ProfilePage = () => {
     const [characterList, setCharacterList] = useState(null);
     const [bossList, setBossList] = useState([
@@ -58,7 +58,7 @@
     ])
     const [error, setError] = useState(null);
     const [SQL, setSQL] = useState(null);
-  
+    const { logout } = useAuth();
     useEffect(() => {
       initSqlJs({
         locateFile: file => `https://sql.js.org/dist/${file}`
@@ -204,6 +204,7 @@
     return (
       <>
         <input className='description' type="file" name="file" onChange={changeHandler} />
+        <button onClick={e => logout()}>logout</button>
         {error && <div>Error: {error}</div>}
       </>
     );

@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-const Register = () => {
+const RegisterPage = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,7 +21,7 @@ const Register = () => {
             .then((response) => response.json())
             .then((result) => {
                 if (result.success) {
-                    // Handle successful registration, e.g., redirect to login
+                    navigate('/login')
                     console.log('registered');
                   }
             })
@@ -47,4 +49,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default RegisterPage;
