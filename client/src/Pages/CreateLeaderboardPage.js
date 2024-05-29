@@ -32,11 +32,25 @@ const CreateLeaderboardPage = () => {
 			});
    }
 
+   const handleCharacterChange = (index, updatedCharacter) => {
+      const updatedCharacters = [...characters];
+      updatedCharacters[index] = updatedCharacter;
+      setCharacters(updatedCharacters);
+    };
+
+    const deleteCharacter = (index) => {
+      const updatedCharacters = [...characters];
+      updatedCharacters.splice(index, 1);
+      setCharacters(updatedCharacters);
+    };
    return(
     <>
-    {characters.map((character, index) => {
-        return <AddCharacter key={index} character={characters[index]}/>
-      })}
+    {characters.map((character, index) => (
+         <div key={index}>
+         <AddCharacter character={character} onCharacterChange={(updatedCharacter) => handleCharacterChange(index, updatedCharacter)} />
+         <button onClick={() => deleteCharacter(index)}>Delete</button>
+       </div>
+      ))}
       <button onClick={e => addCharacter()}>Add New Character</button>
       <button onClick={e => sendLeaderboardData()}>Submit</button>
     </>
