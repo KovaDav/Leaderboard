@@ -3,7 +3,7 @@ const app = express();
 const cors = require("cors");
 const {getCharacterData} = require("./LeaderboardCreator/findTop3DPS.js")
 const {findCharacterIdByName, addToRecord, recordById, addCharacter, addLeaderboard, updateRecordById, getTop3PerformersByDPS,
-     getCharacterListOfLeaderboardMainOrAlt, getCharacterListOfLeaderboard, characterExists, addCharactersToLeaderboard} = require("./db/db.js")
+     getCharacterListOfLeaderboardMainOrAlt, getCharacterListOfLeaderboard, characterExists, addCharactersToLeaderboard, addCharacterToUser} = require("./db/db.js")
 
 const authRoutes = require('./routes/authRoutes');
 const { initializePassport } = require('./config/passportConfig.js');
@@ -98,6 +98,30 @@ app.post('/dps', async (req, res) => {
     console.log(record);
         console.log(await updateRecordById(record.dps, record.name, record.boss, record.difficulty, record.support, record.date))
     res.json({"ok" : "ok"})
+});
+
+app.post('/add_character_to_user', async (req, res) => {
+    const { userId, characterName, regionName } = req.body;
+
+  try {
+    // Find the character ID based on character name and region name
+    const characterResult = await findCharacterIdByName(characterName, regionName)
+
+    if (characterResult.rowCount === 0) {
+      return res.status(404).json({ message: 'Character not found' });
+    }
+
+    const characterId = characterResult.rows[0].id;
+
+    // Add the character to the user
+    await addCharacterToUser(userId, characterId);
+
+    res.status(200).json({ message: 'Character added to user successfully' });
+  } catch (error) {
+    console.error('Error adding character to user', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+    
 });
 
 app.post('/create', async (req, res) => {
