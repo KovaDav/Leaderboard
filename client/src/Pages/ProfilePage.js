@@ -204,7 +204,6 @@
     return (
       <>
         <input className='description' type="file" name="file" onChange={changeHandler} />
-        <button onClick={e => logout()}>logout</button>
         {error && <div>Error: {error}</div>}
       </>
     );

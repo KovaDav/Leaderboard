@@ -70,9 +70,9 @@ app.use(cors({
     credentials: true
 }));
 app.use(session({ secret: 'your_secret', resave: false, saveUninitialized: true,cookie: {
-    secure: false, // Set to true if using https
+    secure: false, 
     httpOnly: true,
-    sameSite: 'lax', // Adjust based on your needs
+    sameSite: 'lax',
   } }));
 app.use(passport.initialize());
 app.use(passport.session());

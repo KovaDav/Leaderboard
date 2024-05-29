@@ -1,4 +1,4 @@
-import { Outlet, Link } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import React, {useEffect, useState, useRef} from 'react';
 import LeaderboardGrid from "../Components/Leaderboard/LeaderboardGrid";
 const initSqlJs = require('sql.js');
@@ -57,6 +57,7 @@ const LeaderboardPage = () => {
         ['Ravaged Tyrant of Beasts', 'Normal'],
     ])
     const [leaderboardData, setLeaderboardData] = useState(null)
+    const { id } = useParams();
 
     useEffect(() =>{
         fetch(
@@ -69,20 +70,19 @@ const LeaderboardPage = () => {
                       },
                     body: JSON.stringify(
                     {
-                            leaderboardId: "8",
+                            leaderboardId: id,
                             leaderboardMains: true
                     }),
                 })
                 .then((response) => response.json()
                 )
                 .then((result) => {	
-                    console.log(result);
                     setLeaderboardData(JSON.parse(result))
                 })
                 .catch((error) => {
                     console.error('Error:', error);
                 });
-      },[])
+      },[id])
 
     const LeaderboardGenerator = () => {
         return bossList.map(boss => <LeaderboardGrid title={boss} data={getSpecificBossData(boss)} key={`${boss[0]},${boss[1]}`}/>)

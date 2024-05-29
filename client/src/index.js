@@ -18,7 +18,7 @@ const router = createBrowserRouter([
     element: <Layout />,
     children:[
       {
-        path: "/leaderboard",
+        path: "/leaderboard/:id",
         element: <LeaderboardPage />
       },
       {
