@@ -11,3 +11,13 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.deleteButton{
+  background-color: red;
+  color: aliceblue;
+  height: 2rem;
+}
+
+.deleteButton:hover{
+  background-color: rgb(250, 72, 72);
+}

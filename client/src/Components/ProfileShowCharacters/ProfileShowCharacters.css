@@ -1,0 +1,7 @@
+.characterContainer{
+    display: flex;
+    flex-direction: row;
+    color: aliceblue;
+    gap: 0.5rem;
+    align-items: center
+}

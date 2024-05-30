@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './AddCharacter.css'
 import Dropdown from '../Dropdown/Dropdown';
-const AddCharacter = ({character, onCharacterChange, onDelete }) => {
+const AddCharacter = ({checkbox, character, onCharacterChange }) => {
   const [classList, setClassList] = useState(['Aeromancer', 'Arcanist', 'Artillerist', 'Artist', 'Bard', 'Berserker', 'Breaker', 'Deadeye',
    'Deathblade', 'Destroyer', 'Glaivier', 'Gunlancer', 'Gunslinger', 'Machinist', 'Paladin', 'Reaper', 'Scrapper', 'Shadowhunter', 'Sharpshooter',
     'Slayer', 'Sorceress', 'Souleater', 'Soulfist', 'Striker', 'Summoner', 'Wardancer'])
@@ -29,6 +29,7 @@ const AddCharacter = ({character, onCharacterChange, onDelete }) => {
         value={character.name}
         onChange={handleInputChange}
       />
+      {checkbox &&<>
       <input
         type="checkbox"
         name="main"
@@ -41,6 +42,7 @@ const AddCharacter = ({character, onCharacterChange, onDelete }) => {
         onSelect={handleSelectClass}
         selectedOption={character.class}
       />
+      </>}
       <Dropdown
         options={['EUC', 'NAW', 'NAE', 'SA']}
         name={'Region'}

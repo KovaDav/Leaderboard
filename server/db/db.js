@@ -295,6 +295,33 @@ function addCharacterToUser(userId, characterId){
     });
 }
 
+function getCharactersOfUser(userId){
+    return new Promise((resolve, reject) => {
+        const query = `
+        SELECT
+    c.name AS character_name,
+    c.class AS character_class,
+    c.region AS character_region
+FROM
+    user_characters uc
+JOIN
+    character c ON uc.character_id = c.id
+WHERE
+    uc.user_id = $1;
+        `;
+        const values = [userId];
+
+        client.query(query, values, (err, result) => {
+            if (err) {
+                console.error('Error executing query', err);
+                reject(err); // Reject the promise with the error
+            } else {
+                resolve(result.rows); // Resolve the promise with the query result
+            }
+        });
+    });
+}
+
 function recordById(id, boss, difficulty){
     return new Promise((resolve, reject) => {
         client.query(`SELECT * 
@@ -470,3 +497,4 @@ exports.login = login;
 exports.serialize = serialize;
 exports.register = register;
 exports.addCharacterToUser = addCharacterToUser;
+exports.getCharactersOfUser = getCharactersOfUser;

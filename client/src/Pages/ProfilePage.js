@@ -1,6 +1,9 @@
   import { Outlet, Link } from "react-router-dom";
   import {useAuth} from '../Auth/AuthContext'
   import React, { useEffect, useState, useRef } from 'react';
+  import ProfileAddCharacter from "../Components/ProfileAddCharacter/ProfileAddCharacter";
+  import ProfileShowCharacters from "../Components/ProfileShowCharacters/ProfileShowCharacters";
+
   const initSqlJs = require('sql.js');
   const ProfilePage = () => {
     const [characterList, setCharacterList] = useState(null);
@@ -205,6 +208,8 @@
       <>
         <input className='description' type="file" name="file" onChange={changeHandler} />
         {error && <div>Error: {error}</div>}
+        <ProfileAddCharacter></ProfileAddCharacter>
+        <ProfileShowCharacters></ProfileShowCharacters>
       </>
     );
   };

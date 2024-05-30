@@ -1,25 +1,26 @@
 import { Outlet, Link } from "react-router-dom";
 import React, {useEffect, useState, useRef} from 'react';
-import AddCharacter from "../Components/AddCharacter/AddCharacter";
-const initSqlJs = require('sql.js');
+import AddCharacter from "../AddCharacter/AddCharacter";
+import './ProfileAddCharacter.css'
+import {useAuth} from '../../Auth/AuthContext'
 
-const CreateLeaderboardPage = () => {
-   const [characters, setCharacters] = useState([{ name: '', class: '', main: false, region: '' }]);
- 
+const ProfileAddCharacter = () => {
+   const [characters, setCharacters] = useState([]);
+   const { user } = useAuth();
    const addCharacter = () => {
       setCharacters([...characters, { name: '', class: '', main: false, region: '' }]);
     };
   
 
    const sendLeaderboardData = () => {
-      console.log(characters);
+    characters.forEach(character => {
       fetch(
-			`http://localhost:3001/create`
+			`http://localhost:3001/add_character_to_user`
 			,
 			{
 				method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({characters: characters}),
+				body: JSON.stringify({userId: user.id, characterName: character.name, region: character.region}),
 
 			})
 			.then((response) => response.json()
@@ -30,6 +31,7 @@ const CreateLeaderboardPage = () => {
 			.catch((error) => {
 				console.error('Error:', error);
 			});
+    });
    }
 
    const handleCharacterChange = (index, updatedCharacter) => {
@@ -47,14 +49,14 @@ const CreateLeaderboardPage = () => {
     <>
     {characters.map((character, index) => (
          <div key={index}>
-         <AddCharacter checkbox={true} character={character} onCharacterChange={(updatedCharacter) => handleCharacterChange(index, updatedCharacter)} />
-         <button onClick={() => deleteCharacter(index)}>Delete</button>
+         <AddCharacter checkbox={false} character={character} onCharacterChange={(updatedCharacter) => handleCharacterChange(index, updatedCharacter)} />
+         <button className="deleteButton" onClick={() => deleteCharacter(index)}>Delete</button>
        </div>
       ))}
       <button onClick={e => addCharacter()}>Add New Character</button>
-      <button onClick={e => sendLeaderboardData()}>Submit</button>
+      <button onClick={e => sendLeaderboardData()}>Save</button>
     </>
    )
 };
   
-  export default CreateLeaderboardPage;
+  export default ProfileAddCharacter;
