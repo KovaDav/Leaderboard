@@ -210,11 +210,12 @@
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ leaderboardId: "8" }),
+          body: JSON.stringify({ userId: user.id }),
         })
         .then((response) => response.json())
         .then((result) => {
-          setCharacterList(JSON.parse(result))
+          result = JSON.parse(result)
+          setCharacterList(result.characterList)     
         })
         .catch((error) => {
           console.error('Error:', error);

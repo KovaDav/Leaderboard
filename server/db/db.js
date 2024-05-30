@@ -342,6 +342,31 @@ WHERE
     });
 }
 
+function getLeaderboardsThatContainUser(userId){
+    return new Promise((resolve, reject) => {
+        const query = `
+        SELECT DISTINCT
+    lc.leaderboardid
+FROM
+    user_characters uc
+JOIN
+    leaderboard_character lc ON uc.character_id = lc.characterid
+WHERE
+    uc.user_id = $1;
+        `;
+        const values = [userId];
+
+        client.query(query, values, (err, result) => {
+            if (err) {
+                console.error('Error executing query', err);
+                reject(err); // Reject the promise with the error
+            } else {
+                resolve(result.rows); // Resolve the promise with the query result
+            }
+        });
+    });
+}
+
 function recordById(id, boss, difficulty){
     return new Promise((resolve, reject) => {
         client.query(`SELECT * 
@@ -519,3 +544,4 @@ exports.register = register;
 exports.addCharacterToUser = addCharacterToUser;
 exports.getCharactersOfUser = getCharactersOfUser;
 exports.deleteCharacterFromUser = deleteCharacterFromUser;
+exports.getLeaderboardsThatContainUser = getLeaderboardsThatContainUser;

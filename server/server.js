@@ -4,7 +4,8 @@ const cors = require("cors");
 const {getCharacterData} = require("./LeaderboardCreator/findTop3DPS.js")
 const {findCharacterIdByName, addToRecord, recordById, addCharacter, addLeaderboard, updateRecordById, getTop3PerformersByDPS,
      getCharacterListOfLeaderboardMainOrAlt, getCharacterListOfLeaderboard, characterExists, addCharactersToLeaderboard, addCharacterToUser,
-     getCharactersOfUser, deleteCharacterFromUser} = require("./db/db.js")
+     getCharactersOfUser, deleteCharacterFromUser,
+     getLeaderboardsThatContainUser} = require("./db/db.js")
 
 const authRoutes = require('./routes/authRoutes');
 const { initializePassport } = require('./config/passportConfig.js');
@@ -114,7 +115,7 @@ app.post('/add_character_to_user', async (req, res) => {
     const characterId = characterResult[0].id;
 
     await addCharacterToUser(userId, characterId);
-    
+
     const characterList = await getCharactersOfUser(userId)
     res.status(200).json({ message: 'Character added to user successfully', characterList: characterList });
   } catch (error) {
@@ -205,10 +206,24 @@ app.post('/leaderboard', async (req, res) => {
 });
 
 app.post('/characters', async (req, res) => {
-    const leaderboardId = req.body.leaderboardId;
+    const userId = req.body.userId;
+    
     try {
-        const characterList = await getCharacterListOfLeaderboard(leaderboardId)
-        res.json(JSON.stringify(characterList));
+        const leaderboardList = await getLeaderboardsThatContainUser(userId)
+        if(leaderboardList.rowCount === 0){
+            return res.status(404).json({ message: `User has no characters linked to account that are in leaderboard.` });
+        }
+        
+        let characterList = []
+        for (const leaderboard of leaderboardList) {
+            const records = await getCharacterListOfLeaderboard(leaderboard.leaderboardid)
+            
+            records.forEach(record => {
+                characterList.push(record)
+            });
+        }
+        console.log(characterList);
+        res.json(JSON.stringify({characterList: characterList}));
     } catch (error) {
         console.error('Error:', error);
         res.status(500).json({ error: 'Internal server error' });
