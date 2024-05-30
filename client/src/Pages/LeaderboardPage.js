@@ -58,6 +58,7 @@ const LeaderboardPage = () => {
     ])
     const [leaderboardData, setLeaderboardData] = useState(null)
     const { id } = useParams();
+    const [mains, setMains] = useState(true)
 
     useEffect(() =>{
         fetch(
@@ -71,7 +72,7 @@ const LeaderboardPage = () => {
                     body: JSON.stringify(
                     {
                             leaderboardId: id,
-                            leaderboardMains: true
+                            leaderboardMains: mains
                     }),
                 })
                 .then((response) => response.json()
@@ -82,7 +83,7 @@ const LeaderboardPage = () => {
                 .catch((error) => {
                     console.error('Error:', error);
                 });
-      },[id])
+      },[id, mains])
 
     const LeaderboardGenerator = () => {
         return bossList.map(boss => <LeaderboardGrid title={boss} data={getSpecificBossData(boss)} key={`${boss[0]},${boss[1]}`}/>)
@@ -99,7 +100,8 @@ const LeaderboardPage = () => {
     }
    return(
     <>
-    
+    <button onClick={e => setMains(true)}>mains</button>
+    <button onClick={e => setMains(false)}>alts</button>
     {leaderboardData === null ? null : LeaderboardGenerator()}
     </>
    )

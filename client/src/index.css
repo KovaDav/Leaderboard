@@ -15,9 +15,29 @@ code {
 .deleteButton{
   background-color: red;
   color: aliceblue;
-  height: 2rem;
+  height: 1.8rem;
+  border: none;
+  border-radius: 0.3rem;
 }
 
 .deleteButton:hover{
   background-color: rgb(250, 72, 72);
+}
+
+#uploadButton{
+  background-color: rgb(26, 151, 26);
+  color: aliceblue;
+  border:none;
+  border-radius: 0.5rem;
+  height: 2rem;
+  width: 5rem;
+}
+
+#uploadButton:hover{
+  background-color: rgb(43, 226, 43);
+}
+
+.addCharacterDeleteButtonContainer{
+  gap: 1rem;
+  align-items: center;
 }

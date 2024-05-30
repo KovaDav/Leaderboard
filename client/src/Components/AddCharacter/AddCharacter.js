@@ -20,6 +20,10 @@ const AddCharacter = ({checkbox, character, onCharacterChange }) => {
       onCharacterChange({ ...character, region: option });
     };
 
+    const handleSelectMain = (option) => {
+      onCharacterChange({ ...character, main: option === 'Main' ? true : false});
+    };
+
     return (
       <div className='CharacterContainer'>   
       <input
@@ -30,11 +34,11 @@ const AddCharacter = ({checkbox, character, onCharacterChange }) => {
         onChange={handleInputChange}
       />
       {checkbox &&<>
-      <input
-        type="checkbox"
-        name="main"
-        checked={character.main}
-        onChange={handleInputChange}
+        <Dropdown
+        options={['Main', 'Alt']}
+        name={'Main or Alt'}
+        onSelect={handleSelectMain}
+        selectedOption={character.main}
       />
       <Dropdown
         options={classList}

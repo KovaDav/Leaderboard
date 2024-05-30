@@ -1,35 +1,48 @@
-import { Outlet, Link } from "react-router-dom";
-import React, {useEffect, useState, useRef} from 'react';
+import React, {useState} from 'react';
 import AddCharacter from "../Components/AddCharacter/AddCharacter";
-const initSqlJs = require('sql.js');
+import {useAuth} from '../Auth/AuthContext'
 
 const CreateLeaderboardPage = () => {
-   const [characters, setCharacters] = useState([{ name: '', class: '', main: false, region: '' }]);
- 
+   const [characters, setCharacters] = useState([{ name: '', class: '', main: null, region: '' }]);
+   const { user } = useAuth();
    const addCharacter = () => {
-      setCharacters([...characters, { name: '', class: '', main: false, region: '' }]);
+      setCharacters([...characters, { name: '', class: '', main: null, region: '' }]);
     };
   
 
    const sendLeaderboardData = () => {
-      console.log(characters);
+    let dataValid = true
+    characters.forEach(character => {
+      if(character.name === '' || character.class === '' || character.main === null || character.region === ''){
+        alert('Every field is required to be filled out.')
+        dataValid = false
+        return
+      }
+    });
+    if(dataValid){
       fetch(
 			`http://localhost:3001/create`
 			,
 			{
 				method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({characters: characters}),
+				body: JSON.stringify({userId: user.id ,characters: characters}),
 
 			})
 			.then((response) => response.json()
 			)
 			.then((result) => {
-				console.log(result);
+        console.log(result);
+				if(result.success){
+          alert(`Leaderboard successfully created here is your leaderboard's id: ${result.id}.
+          If there is no data uploaded of these characters, you will have to set up your characters in the Profile page and upload your encounters.db!`)
+          window.open(`http://localhost:3000/leaderboard/${result.id}`, "_blank") 
+        }
 			})
 			.catch((error) => {
 				console.error('Error:', error);
 			});
+    }
    }
 
    const handleCharacterChange = (index, updatedCharacter) => {
@@ -46,9 +59,9 @@ const CreateLeaderboardPage = () => {
    return(
     <>
     {characters.map((character, index) => (
-         <div key={index}>
+         <div className="addCharacterDeleteButtonContainer" key={index}>
          <AddCharacter checkbox={true} character={character} onCharacterChange={(updatedCharacter) => handleCharacterChange(index, updatedCharacter)} />
-         <button onClick={() => deleteCharacter(index)}>Delete</button>
+         <button className="deleteButton" onClick={() => deleteCharacter(index)}>Delete</button>
        </div>
       ))}
       <button onClick={e => addCharacter()}>Add New Character</button>

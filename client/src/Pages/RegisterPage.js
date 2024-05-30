@@ -22,15 +22,19 @@ const RegisterPage = () => {
             .then((result) => {
                 if (result.success) {
                     navigate('/login')
-                    console.log('registered');
+                    alert('Registered successfully.')
+                  }else{
+                    alert(result.message)
                   }
             })
             .catch((error) => {
               console.error('Error:', error);
+              console.log(error);
             });
       
     } catch (error) {
       console.error('Registration failed:', error);
+      console.log(error.message);
     }
   };
 

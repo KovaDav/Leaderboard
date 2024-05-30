@@ -162,9 +162,11 @@ function getListOfSupports(leaderboardID) {
     });
 }
 
-function addLeaderboard(){ 
+function createLeaderboard(userId){ 
 return new Promise((resolve, reject) => {
-    client.query(`INSERT INTO leaderboard DEFAULT VALUES RETURNING id;`
+    const query =`INSERT INTO leaderboard (userid) VALUES ($1) RETURNING id;`
+    const values = [userId];
+    client.query(query, values
      ,   (err, result) => {
         if (err) {
             console.error('Error executing query', err);
@@ -269,7 +271,7 @@ return new Promise((resolve, reject) => {
                 console.error('Error executing query', err);
                 reject(err);
             } else {
-                resolve(result.rows);
+                resolve(result);
             }
         });
 });
@@ -531,7 +533,7 @@ exports.findCharacterIdByName = findCharacterIdByName;
 exports.addToRecord = addToRecord;
 exports.recordById = recordById;
 exports.addCharacter = addCharacter;
-exports.addLeaderboard = addLeaderboard;
+exports.createLeaderboard = createLeaderboard;
 exports.updateRecordById = updateRecordById;
 exports.getTop3PerformersByDPS = getTop3PerformersByDPS;
 exports.getCharacterListOfLeaderboardMainOrAlt = getCharacterListOfLeaderboardMainOrAlt;

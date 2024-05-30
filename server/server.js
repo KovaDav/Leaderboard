@@ -1,8 +1,7 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
-const {getCharacterData} = require("./LeaderboardCreator/findTop3DPS.js")
-const {findCharacterIdByName, addToRecord, recordById, addCharacter, addLeaderboard, updateRecordById, getTop3PerformersByDPS,
+const {findCharacterIdByName, addToRecord, recordById, addCharacter, createLeaderboard, updateRecordById, getTop3PerformersByDPS,
      getCharacterListOfLeaderboardMainOrAlt, getCharacterListOfLeaderboard, characterExists, addCharactersToLeaderboard, addCharacterToUser,
      getCharactersOfUser, deleteCharacterFromUser,
      getLeaderboardsThatContainUser} = require("./db/db.js")
@@ -82,7 +81,7 @@ app.use('/auth', authRoutes);
 initializePassport(passport);
 
 const ensureAuthenticated = (req, res, next) => {
-    console.log(req.isAuthenticated());
+    //console.log(req.isAuthenticated());
     if (req.isAuthenticated()) {
       return next();
     }
@@ -107,21 +106,22 @@ app.post('/add_character_to_user', async (req, res) => {
   try {
     const characterResult = await findCharacterIdByName(characterName, region)
 
-    
-    if (characterResult.rowCount === 0) {
-      return res.status(404).json({ message: `Character: ${characterName} not found in region: ${region}. This character is not part of any leaderboard yet.` });
-    }
 
-    const characterId = characterResult[0].id;
+    if (characterResult.rowCount === 0) {
+      return res.status(404).json({success: false, message: `Character: ${characterName} not found in region: ${region}. This character is not part of any leaderboard yet.` });
+    }
+    console.log(characterResult.rows);
+    const characterId = characterResult.rows[0].id;
 
     await addCharacterToUser(userId, characterId);
 
     const characterList = await getCharactersOfUser(userId)
-    res.status(200).json({ message: 'Character added to user successfully', characterList: characterList });
+    res.status(200).json({success: true, message: 'Character added to user successfully', characterList: characterList });
   } catch (error) {
     console.error('Error adding character to user', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({success: false, message: 'Internal server error' });
   } 
+
 });
 
 app.get('/get_character_list', async (req, res) => {
@@ -149,8 +149,7 @@ app.post('/delete_character_from_user', async (req, res) => {
     if (characterResult.rowCount === 0) {
       return res.status(404).json({ message: `Character: ${characterName} not found in region: ${region}. This character is not part of any leaderboard yet.` });
     }
-    console.log(characterResult);
-    const characterId = characterResult[0].id;
+    const characterId = characterResult.rows[0].id;
 
     await deleteCharacterFromUser(userId, characterId);
 
@@ -164,8 +163,10 @@ app.post('/delete_character_from_user', async (req, res) => {
 
 app.post('/create', async (req, res) => {
     const characters = req.body.characters;
+    const userId = req.body.userId
     let characterIdList = [];
     let existingCharacterIdList = [];
+    console.log(userId);
     
     try { 
         for (const character of characters) {
@@ -176,7 +177,7 @@ app.post('/create', async (req, res) => {
                 characterIdList.push(characterResult[0].id);
             }else{
                 const id = await findCharacterIdByName(character.name, character.region)
-                existingCharacterIdList.push(id[0].id)
+                existingCharacterIdList.push(id.rows[0].id)
             }
         }
         for (const id of characterIdList) {
@@ -184,12 +185,12 @@ app.post('/create', async (req, res) => {
                 await addToRecord(id, 0, 'noSupp',  boss[0], boss[1], 0)
             }
         }
-        const leaderboardId = await addLeaderboard()
-        const result = await addCharactersToLeaderboard(leaderboardId[0].id, characterIdList.concat(existingCharacterIdList))
-        res.json(leaderboardId);
+        const leaderboardId = await createLeaderboard(parseInt(userId))
+        await addCharactersToLeaderboard(leaderboardId[0].id, characterIdList.concat(existingCharacterIdList))
+        res.status(200).json({success: true, id: leaderboardId[0].id});
     } catch (error) {
         console.error('Error:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({success: false, error: 'Internal server error' });
     }
 });
 

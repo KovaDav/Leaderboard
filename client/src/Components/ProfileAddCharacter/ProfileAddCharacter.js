@@ -27,7 +27,9 @@ const ProfileAddCharacter = ({characters, setCharacters}) => {
 			)
 			.then((result) => {
 				alert(result.message);
-                setCharacters(result.characterList)
+        if(result.success){
+          setCharacters(result.characterList)
+        }
 			})
 			.catch((error) => {
 				console.error('Error:', error);

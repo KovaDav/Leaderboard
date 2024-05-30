@@ -12,10 +12,13 @@ const LoginPage = () => {
     e.preventDefault();
     try {
       await login(username, password);
-      console.log('Login successful, navigating to profile...');
       navigate('/profile');
     } catch (err) {
-      console.error('Login failed', err);
+      if(err.response.data.message === 'No user with that username' || err.response.data.message === 'Password incorrect'){
+        alert('Incorrect username or password.')
+      }else{
+        alert(err.response.data.message)
+      }
     }
   };
 

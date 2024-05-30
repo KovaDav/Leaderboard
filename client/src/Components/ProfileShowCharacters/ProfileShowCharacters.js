@@ -8,7 +8,6 @@ const ProfileShowCharacters = ({characters, setCharacters}) => {
    const { user } = useAuth();
   
 useEffect(() => {
-    console.log('rerendered');
 printCharacters()
     
 })
@@ -39,7 +38,6 @@ const printCharacters = () => {
             )
             .then((result) => {
                setCharacters(result.characterList)
-               console.log(result);
             })
             .catch((error) => {
                 console.error('Error:', error);

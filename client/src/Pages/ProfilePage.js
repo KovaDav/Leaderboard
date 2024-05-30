@@ -63,6 +63,10 @@
     const [error, setError] = useState(null);
     const [SQL, setSQL] = useState(null);
     const { user } = useAuth();
+    const fileInputRef = useRef(null);
+    const handleButtonClick = () => {
+      fileInputRef.current.click();
+  };
 
     useEffect(() => {
       const getCharacterList = () => {
@@ -76,7 +80,6 @@
                )
                .then((result) => {
                   setCharacters(result.characterList)
-                  console.log(result);
                })
                .catch((error) => {
                    console.error('Error:', error);
@@ -230,7 +233,17 @@
   
     return (
       <>
-        <input className='description' type="file" name="file" onChange={changeHandler} />
+         <div>
+            <input 
+                type="file" 
+                ref={fileInputRef} 
+                style={{ display: 'none' }} 
+                onChange={changeHandler} 
+            />
+            <button id="uploadButton" type="button" onClick={handleButtonClick}>
+                Upload
+            </button>
+        </div>
         {error && <div>Error: {error}</div>}
         <ProfileShowCharacters characters={characters} setCharacters={setCharacters}></ProfileShowCharacters>
         <ProfileAddCharacter characters={characters} setCharacters={setCharacters}></ProfileAddCharacter>

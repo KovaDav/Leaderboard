@@ -5,11 +5,15 @@ const passport = require('passport');
 const registerUser = async (req, res) => {
   const { username, password } = req.body;
   try {
+    if (password.length < 5){
+      res.status(500).json({ success: false, message: 'Password shorter than 5 characters.' });
+      return
+    }
     const hashedPassword = await hashPassword(password);
     const result = await register(username, hashedPassword);
     res.status(201).json({ success: true, user: result[0] });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: 'Username already registered.' });
   }
 };
 
