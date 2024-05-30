@@ -4,7 +4,7 @@ const cors = require("cors");
 const {getCharacterData} = require("./LeaderboardCreator/findTop3DPS.js")
 const {findCharacterIdByName, addToRecord, recordById, addCharacter, addLeaderboard, updateRecordById, getTop3PerformersByDPS,
      getCharacterListOfLeaderboardMainOrAlt, getCharacterListOfLeaderboard, characterExists, addCharactersToLeaderboard, addCharacterToUser,
-     getCharactersOfUser} = require("./db/db.js")
+     getCharactersOfUser, deleteCharacterFromUser} = require("./db/db.js")
 
 const authRoutes = require('./routes/authRoutes');
 const { initializePassport } = require('./config/passportConfig.js');
@@ -106,6 +106,7 @@ app.post('/add_character_to_user', async (req, res) => {
   try {
     const characterResult = await findCharacterIdByName(characterName, region)
 
+    
     if (characterResult.rowCount === 0) {
       return res.status(404).json({ message: `Character: ${characterName} not found in region: ${region}. This character is not part of any leaderboard yet.` });
     }
@@ -113,8 +114,9 @@ app.post('/add_character_to_user', async (req, res) => {
     const characterId = characterResult[0].id;
 
     await addCharacterToUser(userId, characterId);
-
-    res.status(200).json({ message: 'Character added to user successfully' });
+    
+    const characterList = await getCharactersOfUser(userId)
+    res.status(200).json({ message: 'Character added to user successfully', characterList: characterList });
   } catch (error) {
     console.error('Error adding character to user', error);
     res.status(500).json({ message: 'Internal server error' });
@@ -131,6 +133,28 @@ app.get('/get_character_list', async (req, res) => {
     }
 
     res.status(200).json({ characterList: characterList });
+  } catch (error) {
+    console.error('Error adding character to user', error);
+    res.status(500).json({ message: 'Internal server error' });
+  } 
+});
+
+app.post('/delete_character_from_user', async (req, res) => {
+    const { userId, characterName, region } = req.body;
+    console.log(characterName, region, userId);
+  try {
+    const characterResult = await findCharacterIdByName(characterName, region)
+
+    if (characterResult.rowCount === 0) {
+      return res.status(404).json({ message: `Character: ${characterName} not found in region: ${region}. This character is not part of any leaderboard yet.` });
+    }
+    console.log(characterResult);
+    const characterId = characterResult[0].id;
+
+    await deleteCharacterFromUser(userId, characterId);
+
+    const characterList = await getCharactersOfUser(userId)
+    res.status(200).json({ characterList : characterList });
   } catch (error) {
     console.error('Error adding character to user', error);
     res.status(500).json({ message: 'Internal server error' });

@@ -4,52 +4,50 @@ import AddCharacter from "../AddCharacter/AddCharacter";
 import './ProfileShowCharacters.css'
 import {useAuth} from '../../Auth/AuthContext'
 
-const ProfileShowCharacters = () => {
-   const [characters, setCharacters] = useState(null);
+const ProfileShowCharacters = ({characters, setCharacters}) => {
    const { user } = useAuth();
   
 useEffect(() => {
-    const getCharacterList = () => {
-       fetch(
-             `http://localhost:3001/get_character_list?userId=${user.id}`
-             ,
-             {
-                 method: 'GET'
-             })
-             .then((response) => response.json()
-             )
-             .then((result) => {
-                setCharacters(result.characterList)
-                console.log(result);
-             })
-             .catch((error) => {
-                 console.error('Error:', error);
-             });
-    }
-    getCharacterList()
-}, [])
+    console.log('rerendered');
+printCharacters()
+    
+})
 
-   const handleCharacterChange = (index, updatedCharacter) => {
-      const updatedCharacters = [...characters];
-      updatedCharacters[index] = updatedCharacter;
-      setCharacters(updatedCharacters);
-    };
+const printCharacters = () => {
+
+    return characters.map((character, index) => (  <div className="characterContainer" key={index}>
+    <p>{character.name}</p>
+    <p>{character.class}</p>
+    <p>{character.region}</p>
+    <button className="deleteButton" onClick={() => deleteCharacter(index)}>Delete</button>
+   </div>
+    ))
+}
 
     const deleteCharacter = (index) => {
-      const updatedCharacters = [...characters];
-      updatedCharacters.splice(index, 1);
-      setCharacters(updatedCharacters);
+        fetch(
+            `http://localhost:3001/delete_character_from_user`
+            ,
+            {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({userId: user.id, characterName: characters[index].name, region: characters[index].region}),
+
+			})
+            
+            .then((response) => response.json()
+            )
+            .then((result) => {
+               setCharacters(result.characterList)
+               console.log(result);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
     };
    return(
     <>
-    {characters !== null &&characters.map((character, index) => (
-        <div className="characterContainer" key={index}>
-        <p>{character.character_name}</p>
-        <p>{character.character_class}</p>
-        <p>{character.character_region}</p>
-        <button className="deleteButton" onClick={() => deleteCharacter(index)}>Delete</button>
-       </div>
-      ))}
+    {characters !== null && printCharacters()}
     </>
    )
 };

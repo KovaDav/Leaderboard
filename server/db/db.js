@@ -295,13 +295,33 @@ function addCharacterToUser(userId, characterId){
     });
 }
 
+function deleteCharacterFromUser(userId, characterId){
+    return new Promise((resolve, reject) => {
+        const query = `
+        DELETE FROM user_characters 
+        WHERE user_id = $1
+        AND character_id = $2;
+        `;
+        const values = [userId, characterId];
+
+        client.query(query, values, (err, result) => {
+            if (err) {
+                console.error('Error executing query', err);
+                reject(err); // Reject the promise with the error
+            } else {
+                resolve(result.rows); // Resolve the promise with the query result
+            }
+        });
+    });
+}
+
 function getCharactersOfUser(userId){
     return new Promise((resolve, reject) => {
         const query = `
         SELECT
-    c.name AS character_name,
-    c.class AS character_class,
-    c.region AS character_region
+    c.name AS name,
+    c.class AS class,
+    c.region AS region
 FROM
     user_characters uc
 JOIN
@@ -498,3 +518,4 @@ exports.serialize = serialize;
 exports.register = register;
 exports.addCharacterToUser = addCharacterToUser;
 exports.getCharactersOfUser = getCharactersOfUser;
+exports.deleteCharacterFromUser = deleteCharacterFromUser;

@@ -4,16 +4,16 @@ import AddCharacter from "../AddCharacter/AddCharacter";
 import './ProfileAddCharacter.css'
 import {useAuth} from '../../Auth/AuthContext'
 
-const ProfileAddCharacter = () => {
-   const [characters, setCharacters] = useState([]);
+const ProfileAddCharacter = ({characters, setCharacters}) => {
    const { user } = useAuth();
+   const [newCharacters, setNewCharacters] = useState([])
    const addCharacter = () => {
-      setCharacters([...characters, { name: '', class: '', main: false, region: '' }]);
+      setNewCharacters([...newCharacters, { name: '', class: '', region: '' }]);
     };
   
 
    const sendLeaderboardData = () => {
-    characters.forEach(character => {
+    newCharacters.forEach(character => {
       fetch(
 			`http://localhost:3001/add_character_to_user`
 			,
@@ -26,29 +26,31 @@ const ProfileAddCharacter = () => {
 			.then((response) => response.json()
 			)
 			.then((result) => {
-				console.log(result);
+				alert(result.message);
+                setCharacters(result.characterList)
 			})
 			.catch((error) => {
 				console.error('Error:', error);
 			});
     });
+    setNewCharacters([])
    }
 
    const handleCharacterChange = (index, updatedCharacter) => {
-      const updatedCharacters = [...characters];
+      const updatedCharacters = [...newCharacters];
       updatedCharacters[index] = updatedCharacter;
-      setCharacters(updatedCharacters);
+      setNewCharacters(updatedCharacters);
     };
 
     const deleteCharacter = (index) => {
-      const updatedCharacters = [...characters];
+      const updatedCharacters = [...newCharacters];
       updatedCharacters.splice(index, 1);
-      setCharacters(updatedCharacters);
+      setNewCharacters(updatedCharacters);
     };
    return(
     <>
-    {characters.map((character, index) => (
-         <div key={index}>
+    {newCharacters.map((character, index) => (
+         <div className="addCharacterDeleteButtonContainer" key={index}>
          <AddCharacter checkbox={false} character={character} onCharacterChange={(updatedCharacter) => handleCharacterChange(index, updatedCharacter)} />
          <button className="deleteButton" onClick={() => deleteCharacter(index)}>Delete</button>
        </div>

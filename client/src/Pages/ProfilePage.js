@@ -7,6 +7,7 @@
   const initSqlJs = require('sql.js');
   const ProfilePage = () => {
     const [characterList, setCharacterList] = useState(null);
+    const [characters, setCharacters] = useState([]);
     const [bossList, setBossList] = useState([
         ['Killineza the Dark Worshipper', 'Hard'],
         ['Valinak, Herald of the End', 'Hard'],
@@ -61,7 +62,29 @@
     ])
     const [error, setError] = useState(null);
     const [SQL, setSQL] = useState(null);
-    const { logout } = useAuth();
+    const { user } = useAuth();
+
+    useEffect(() => {
+      const getCharacterList = () => {
+         fetch(
+               `http://localhost:3001/get_character_list?userId=${user.id}`
+               ,
+               {
+                   method: 'GET'
+               })
+               .then((response) => response.json()
+               )
+               .then((result) => {
+                  setCharacters(result.characterList)
+                  console.log(result);
+               })
+               .catch((error) => {
+                   console.error('Error:', error);
+               });
+      }
+      getCharacterList()
+  }, [])
+
     useEffect(() => {
       initSqlJs({
         locateFile: file => `https://sql.js.org/dist/${file}`
@@ -208,8 +231,8 @@
       <>
         <input className='description' type="file" name="file" onChange={changeHandler} />
         {error && <div>Error: {error}</div>}
-        <ProfileAddCharacter></ProfileAddCharacter>
-        <ProfileShowCharacters></ProfileShowCharacters>
+        <ProfileShowCharacters characters={characters} setCharacters={setCharacters}></ProfileShowCharacters>
+        <ProfileAddCharacter characters={characters} setCharacters={setCharacters}></ProfileAddCharacter>
       </>
     );
   };
