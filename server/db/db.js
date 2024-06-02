@@ -24,7 +24,7 @@ client
     function addCharacter(characterName, characterClass, region) {
         return new Promise((resolve, reject) => {
             const query = `
-                INSERT INTO Character (name, class, region)
+                INSERT INTO character (name, class, region)
                 VALUES ($1, $2, $3, $4)
                 RETURNING id;
             `;
