@@ -65,6 +65,17 @@ const bossList = [
     ['Ravaged Tyrant of Beasts', 'Normal'],
 ]
 
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', 'https://leaderboard-1-gofr.onrender.com');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  if (req.method === 'OPTIONS') {
+      res.sendStatus(200);
+  } else {
+      next();
+  }
+});
 app.use(helmet());
 app.set('trust proxy', 1);
 app.use(express.json());
