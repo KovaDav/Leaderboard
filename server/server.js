@@ -10,6 +10,7 @@ const authRoutes = require('./routes/authRoutes');
 const { initializePassport } = require('./config/passportConfig.js');
 const session = require('express-session');
 const passport = require('passport');
+const helmet = require('helmet');
 
 const bossList = [
     ['Killineza the Dark Worshipper', 'Hard'],
