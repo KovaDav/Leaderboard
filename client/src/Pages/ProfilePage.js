@@ -71,7 +71,7 @@
     useEffect(() => {
       const getCharacterList = () => {
          fetch(
-               `http://https://leaderboard-s22v.onrender.com/get_character_list?userId=${user.id}`
+               `https://leaderboard-s22v.onrender.com/get_character_list?userId=${user.id}`
                ,
                {
                    method: 'GET'
@@ -188,7 +188,7 @@
   
     const sendPlayerData = (data) => {
       fetch(
-        `http://https://leaderboard-s22v.onrender.com/dps`,
+        `https://leaderboard-s22v.onrender.com/dps`,
         {
           method: 'POST',
           headers: {
@@ -207,7 +207,7 @@
   
     const getCharacterList = () => {
       fetch(
-        `http://https://leaderboard-s22v.onrender.com/characters`,
+        `https://leaderboard-s22v.onrender.com/characters`,
         {
           method: 'POST',
           headers: {

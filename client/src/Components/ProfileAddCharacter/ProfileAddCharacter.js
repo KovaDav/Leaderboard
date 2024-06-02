@@ -15,7 +15,7 @@ const ProfileAddCharacter = ({characters, setCharacters}) => {
    const sendLeaderboardData = () => {
     newCharacters.forEach(character => {
       fetch(
-			`http://https://leaderboard-s22v.onrender.com/add_character_to_user`
+			`https://leaderboard-s22v.onrender.com/add_character_to_user`
 			,
 			{
 				method: 'POST',

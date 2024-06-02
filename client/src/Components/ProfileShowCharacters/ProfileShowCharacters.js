@@ -25,7 +25,7 @@ const printCharacters = () => {
 
     const deleteCharacter = (index) => {
         fetch(
-            `http://https://leaderboard-s22v.onrender.com/delete_character_from_user`
+            `https://leaderboard-s22v.onrender.com/delete_character_from_user`
             ,
             {
             method: 'POST',

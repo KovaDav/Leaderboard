@@ -67,12 +67,12 @@ const bossList = [
 
 app.use(express.json());
 app.use(cors({
-    origin: 'http://localhost:3000',
+    origin: 'localhost:3000',
     credentials: true
 }));
 app.use(session({ secret: 'your_secret', resave: false, saveUninitialized: true,cookie: {
-    secure: false, 
-    httpOnly: true,
+    secure: true, 
+    httpOnly: false,
     sameSite: 'lax',
   } }));
 app.use(passport.initialize());

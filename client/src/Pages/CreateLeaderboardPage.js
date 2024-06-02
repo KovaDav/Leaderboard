@@ -21,7 +21,7 @@ const CreateLeaderboardPage = () => {
     });
     if(dataValid){
       fetch(
-			`http://https://leaderboard-s22v.onrender.com/create`
+			`https://leaderboard-s22v.onrender.com/create`
 			,
 			{
 				method: 'POST',
@@ -36,7 +36,7 @@ const CreateLeaderboardPage = () => {
 				if(result.success){
           alert(`Leaderboard successfully created here is your leaderboard's id: ${result.id}.
           If there is no data uploaded of these characters, you will have to set up your characters in the Profile page and upload your encounters.db!`)
-          window.open(`http://localhost:3000/leaderboard/${result.id}`, "_blank") 
+          window.open(`localhost:3000/leaderboard/${result.id}`, "_blank") 
         }
 			})
 			.catch((error) => {

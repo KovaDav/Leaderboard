@@ -62,7 +62,7 @@ const LeaderboardPage = () => {
 
     useEffect(() =>{
         fetch(
-                `http://https://leaderboard-s22v.onrender.com/leaderboard`
+                `https://leaderboard-s22v.onrender.com/leaderboard`
                 ,
                 {
                     method: 'POST',
