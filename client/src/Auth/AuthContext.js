@@ -9,7 +9,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const axiosInstance = axios.create({
-    baseURL: 'http://localhost:3001',
+    baseURL: 'http://https://leaderboard-s22v.onrender.com',
     withCredentials: true
   });
  

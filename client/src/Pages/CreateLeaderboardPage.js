@@ -21,7 +21,7 @@ const CreateLeaderboardPage = () => {
     });
     if(dataValid){
       fetch(
-			`http://localhost:3001/create`
+			`http://https://leaderboard-s22v.onrender.com/create`
 			,
 			{
 				method: 'POST',

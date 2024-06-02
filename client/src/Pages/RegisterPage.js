@@ -10,7 +10,7 @@ const RegisterPage = () => {
     e.preventDefault();
     try {
         fetch(
-            `http://localhost:3001/auth/register`,
+            `http://https://leaderboard-s22v.onrender.com/auth/register`,
             {
               method: 'POST',
               headers: {
