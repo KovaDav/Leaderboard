@@ -67,7 +67,7 @@ const bossList = [
 
 app.use(express.json());
 app.use(cors({
-    origin: 'https://leaderboard-s22v.onrender.com',
+    origin: 'https://leaderboard-1-gofr.onrender.com/',
     credentials: true
 }));
 app.use(session({ secret: 'your_secret', resave: false, saveUninitialized: true,cookie: {
