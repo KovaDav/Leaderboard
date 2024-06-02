@@ -64,16 +64,12 @@ const bossList = [
     ['Ravaged Tyrant of Beasts', 'Normal'],
 ]
 
-
+app.use(helmet());
+app.set('trust proxy', 1);
 app.use(express.json());
-app.use(cors({
-    origin: 'https://leaderboard-1-gofr.onrender.com/',
-    credentials: true
-}));
 app.use(session({ secret: 'your_secret', resave: false, saveUninitialized: true,cookie: {
     secure: true, 
-    httpOnly: false,
-    sameSite: 'lax',
+    sameSite: 'none',
   } }));
 app.use(passport.initialize());
 app.use(passport.session());
