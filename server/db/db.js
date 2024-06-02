@@ -21,14 +21,14 @@ client
 	});
 
 
-    function addCharacter(characterName, characterClass, main, region) {
+    function addCharacter(characterName, characterClass, region) {
         return new Promise((resolve, reject) => {
             const query = `
-                INSERT INTO Character (name, class, main, region)
+                INSERT INTO Character (name, class, region)
                 VALUES ($1, $2, $3, $4)
                 RETURNING id;
             `;
-            const values = [characterName, characterClass, main, region];
+            const values = [characterName, characterClass, region];
     
             client.query(query, values, (err, result) => {
                 if (err) {
@@ -178,17 +178,24 @@ return new Promise((resolve, reject) => {
 });
 }
 
-function addCharactersToLeaderboard(leaderboardid, characters){ 
+function addCharactersToLeaderboard(leaderboardid, characters) { 
     return new Promise((resolve, reject) => {
-        if (characters.length === 0) {
+        if (characters.size === 0) {
             resolve([]);
             return;
         }
 
-        const values = characters.map((characterid, index) => `($1, $${index + 2})`).join(", ");
-        const query = `INSERT INTO leaderboard_character (leaderboardid, characterid) VALUES ${values}`;
+        const values = [];
+        const params = [leaderboardid];
+        let paramIndex = 2;
 
-        const params = [leaderboardid, ...characters];
+        characters.forEach((main, characterid) => {
+            values.push(`($1, $${paramIndex}, $${paramIndex + 1})`);
+            params.push(main, characterid);
+            paramIndex += 2;
+        });
+
+        const query = `INSERT INTO leaderboard_character (leaderboardid, main, characterid) VALUES ${values.join(", ")}`;
 
         client.query(query, params, (err, result) => {
             if (err) {
@@ -199,7 +206,7 @@ function addCharactersToLeaderboard(leaderboardid, characters){
             }
         });
     });
-    }
+}
 
 function addToRecord(id, dps, support, boss, difficulty, cleardate){
     return new Promise((resolve, reject) => {
@@ -428,7 +435,7 @@ function getTop3PerformersByDPS(leaderboardid, main) {
                         character c ON rc.characterid = c.id
                     WHERE
                         lc.leaderboardid = $1
-                        AND c.main = $2
+                        AND lc.main = $2
                 )
                 SELECT
                     rr.charactername,

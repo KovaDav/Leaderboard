@@ -164,29 +164,32 @@ app.post('/delete_character_from_user', async (req, res) => {
 app.post('/create', async (req, res) => {
     const characters = req.body.characters;
     const userId = req.body.userId
-    let characterIdList = [];
-    let existingCharacterIdList = [];
+    const characterIdList = new Map();
+    const existingCharacterIdList = new Map();
     console.log(userId);
     
     try { 
         for (const character of characters) {
             const exists = await characterExists(character.name, character.region)
             if(!exists[0].exists){
-                const characterResult = await addCharacter(character.name, character.class, character.main, character.region);
+                const characterResult = await addCharacter(character.name, character.class, character.region);
                 console.log(characterResult[0].id);
-                characterIdList.push(characterResult[0].id);
+                characterIdList.set(characterResult[0].id, character.main);
             }else{
                 const id = await findCharacterIdByName(character.name, character.region)
-                existingCharacterIdList.push(id.rows[0].id)
+                existingCharacterIdList.set(id.rows[0].id, character.main)
             }
         }
-        for (const id of characterIdList) {
+        for (const id of characterIdList.keys()) {
             for (const boss of bossList) {
                 await addToRecord(id, 0, 'noSupp',  boss[0], boss[1], 0)
             }
         }
         const leaderboardId = await createLeaderboard(parseInt(userId))
-        await addCharactersToLeaderboard(leaderboardId[0].id, characterIdList.concat(existingCharacterIdList))
+
+        const allCharacters = new Map([...characterIdList, ...existingCharacterIdList])
+        console.log(allCharacters);
+        await addCharactersToLeaderboard(leaderboardId[0].id, allCharacters)
         res.status(200).json({success: true, id: leaderboardId[0].id});
     } catch (error) {
         console.error('Error:', error);
