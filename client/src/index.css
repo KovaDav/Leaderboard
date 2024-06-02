@@ -41,3 +41,7 @@ code {
   gap: 1rem;
   align-items: center;
 }
+
+.whiteText{
+  color: aliceblue;
+}

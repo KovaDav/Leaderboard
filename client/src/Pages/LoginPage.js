@@ -25,12 +25,12 @@ const LoginPage = () => {
   return (
     <form onSubmit={handleSubmit}>
       <div>
-        <label>Username:</label>
+        <label className='whiteText'>Username:</label>
         <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} />
       </div>
       <div>
         <label>Password:</label>
-        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+        <input className='whiteText' type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
       </div>
       <button type="submit">Login</button>
     </form>
